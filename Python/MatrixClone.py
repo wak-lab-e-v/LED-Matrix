@@ -3,6 +3,7 @@ import time
 import tkinter as tk
 from PIL import Image, ImageTk
 import codecs
+import configparser
 
 
 config = configparser.ConfigParser() 
@@ -69,15 +70,15 @@ def getPicture():
     except:
         print(Text)
     index = 0
-    #print(bytesObj)
-    for y in range(1,height+1):
-        for x in range(1,width+1):
-            img.putpixel((multiply*x, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-            img.putpixel((multiply*x+1, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-            img.putpixel((multiply*x-1, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-            img.putpixel((multiply*x, multiply*y-1), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-            img.putpixel((multiply*x, multiply*y+1), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-            index = index + 3
+    if len(bytesObj) >= 3*2*width*height: 
+        for y in range(1,height+1):
+            for x in range(1,width+1):
+                img.putpixel((multiply*x, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
+                img.putpixel((multiply*x+1, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
+                img.putpixel((multiply*x-1, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
+                img.putpixel((multiply*x, multiply*y-1), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
+                img.putpixel((multiply*x, multiply*y+1), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
+                index = index + 3
     maxsize = (multiply*width, multiply*height)
     img = img.resize(maxsize)
     return img
