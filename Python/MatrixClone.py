@@ -68,6 +68,7 @@ def getPicture():
     try:
         bytesObj = codecs.decode(Text, 'hex_codec')
     except:
+        bytesObj = codecs.decode('00', 'hex_codec')
         print(Text)
     index = 0
     if len(bytesObj) >= 3*width*height: 
