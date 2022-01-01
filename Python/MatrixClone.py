@@ -70,7 +70,7 @@ def getPicture():
     except:
         print(Text)
     index = 0
-    if len(bytesObj) >= 3*2*width*height: 
+    if len(bytesObj) >= 3*width*height: 
         for y in range(1,height+1):
             for x in range(1,width+1):
                 img.putpixel((multiply*x, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
