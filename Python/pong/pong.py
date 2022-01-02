@@ -6,6 +6,17 @@ from pynput import keyboard
 import socket
 import pytesseract
 import urllib.request,io
+import configparser
+from pathlib import Path
+
+path = Path(__file__).parent.parent
+# Returns a Pathlib object
+print(path)
+config = configparser.ConfigParser() 
+config.read("{}\MatrixHost.ini".format(path))
+
+HOST = config.get("Pixelserver","host")
+print(HOST)
 
 # monkeypatch: make requests only use ipv4
 import requests.packages.urllib3.util.connection as urllib3_cn
@@ -13,9 +24,6 @@ def allowed_gai_family():
     return socket.AF_INET
 urllib3_cn.allowed_gai_family = allowed_gai_family()
 
-from itertools import chain
-
-HOST = 'pixel.wak-lab.org'
 PORT = 1337
 
 offset_x = 1
@@ -81,8 +89,8 @@ def send():
                 rgb[3]=False
                 output_array[x][y] = rgb
     sock.send(cmd.encode())
-    #Text=sock.recv(4096).decode()
-    #print(Text)
+    Text=sock.recv(30).decode()
+    print(Text)
 
 #msgFromServer = UDPClientSocket.recvfrom(bufferSize)
 
