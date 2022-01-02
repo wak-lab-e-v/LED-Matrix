@@ -1,4 +1,5 @@
 import PixelMatrix
+from math import sin
 
 # Additive Farbmischung
 Weiss = (255, 255, 255)
@@ -12,18 +13,9 @@ Blau  = (0, 0, 255)
 # Wir müssen uns nun nur noch um das setzen der Pixel kümmern
 Matrix = PixelMatrix.PixelMatrix()
 
-x = 10
-y = 20
-Matrix.Putpixel(x,y, Weiss)
+x = 0
+y = 15
+for i in range(60):
+    Matrix.Putpixel(i,y+round(sin(i/10)*15), Weiss)
 
-x = 10
-y = 11
-Matrix.Putpixel(x,y, Rot)
 
-x = 10
-y = 12
-Matrix.Putpixel(x,y, Gruen)
-
-x = 10
-y = 13
-Matrix.Putpixel(x,y, Blau)

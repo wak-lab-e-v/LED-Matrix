@@ -1,10 +1,13 @@
 import PixelMatrix
+from math import sin, cos
+from time import sleep
 
 # Additive Farbmischung
 Weiss = (255, 255, 255)
 Rot   = (255, 0, 0)
 Gruen = (0, 255, 0)
 Blau  = (0, 0, 255)
+Lila  = (200,100,200)
 
 # Wir erzeugen eine Instanz Namens ,,Matrix``
 # der Klasse PixelMatrix() aus der PixelMatrix Bibliothek
@@ -12,18 +15,10 @@ Blau  = (0, 0, 255)
 # Wir müssen uns nun nur noch um das setzen der Pixel kümmern
 Matrix = PixelMatrix.PixelMatrix()
 
-x = 10
-y = 20
-Matrix.Putpixel(x,y, Weiss)
+x = 30
+y = 15
+for i in range(60):
+    Matrix.Putpixel(x+round(cos(i/9)*15),y+round(sin(i/9)*15), Lila)
+    sleep(0.5)
 
-x = 10
-y = 11
-Matrix.Putpixel(x,y, Rot)
 
-x = 10
-y = 12
-Matrix.Putpixel(x,y, Gruen)
-
-x = 10
-y = 13
-Matrix.Putpixel(x,y, Blau)
