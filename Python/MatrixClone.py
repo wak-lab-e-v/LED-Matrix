@@ -8,7 +8,6 @@ import configparser
 
 config = configparser.ConfigParser() 
 config.read(r"MatrixHost.ini")
-
 HOST = config.get("Pixelserver","host")
 PORT = 1337
 width = 60
@@ -69,7 +68,8 @@ def getPicture():
         bytesObj = codecs.decode(Text, 'hex_codec')
     except:
         bytesObj = codecs.decode('00', 'hex_codec')
-        print(Text)
+        print(len(Test), Text)
+        Text=sock.recv(3*2*width*height).decode()
     index = 0
     if len(bytesObj) >= 3*width*height: 
         for y in range(1,height+1):

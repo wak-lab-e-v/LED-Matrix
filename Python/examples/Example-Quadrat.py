@@ -1,6 +1,4 @@
 import PixelMatrix
-from math import sin, cos
-from time import sleep
 import configparser
 config = configparser.ConfigParser() 
 config.read(r"..\..\..\MatrixHost.ini")
@@ -21,12 +19,10 @@ Lila  = (200,100,200)
 #Matrix = PixelMatrix.UdpPixelMatrix()
 Matrix = PixelMatrix.PixelMatrix(HOST)
 Matrix.Black()
-x = 30
-y = 16
-for i in range(1,59):
-    Matrix.Putpixel(i,y+round(sin(i/9)*15), Gruen)
-    Matrix.Putpixel(x+round(cos(i/9)*15),int(i/2), Rot)
-    Matrix.Putpixel(x+round(cos(i/9)*15),y+round(sin(i/9)*15), Lila)
-    sleep(0.4)
 
 
+x = 10
+y = 10
+for i in range(1,11):
+        for j in range(10):
+                Matrix.Putpixel(x+i,y+j, Weiss)

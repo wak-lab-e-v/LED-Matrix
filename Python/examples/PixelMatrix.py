@@ -3,6 +3,7 @@ import time
 import numpy as np
 from threading import Thread, Event
 
+
 #serverAddressPort   = ("192.168.188.114", 21324)
 #serverAddressPort   = ("192.168.188.115", 21324)
 #serverAddressPort   = ("192.168.178.39", 21324)
@@ -24,7 +25,7 @@ from threading import Thread, Event
 # 5 + n*3   Green Value
 # 6 + n*3   Blue Value
 
-class PixelMatrix():
+class UdpPixelMatrix():
     def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True):
         self.serverAddressPort = (UDPserver, Port)
         self.lastSend = int(round(time.time() * 1000))
@@ -42,11 +43,16 @@ class PixelMatrix():
             send_thread.start()
 
     def PixelDecoder(self, x, y):
-        Zeile  = y  # von oben nach unten wie auch in den Bildern
+        if (y == 0):
+            y = 1
+        if (x == 0):
+            x = 1
+            
+        Zeile  = y-1  # von oben nach unten wie auch in den Bildern
         if ((Zeile % 2) == 0):
-            Spalte = x
+            Spalte = x-1
         else:
-            Spalte = (self.Width-1) - x
+            Spalte = (self.Width-1) - (x-1)
         return Zeile, Spalte
 
     def cyclic_send(self):
@@ -92,6 +98,9 @@ class PixelMatrix():
         code = ((r1 & 0x3e) <<10) | ((g1 & 0x3f)<<5) | ((b1 & 0x3e)>>1)
         return [ (code  >> 8) & 0xff, code & 0xff, 0]
 
+    def drawpixel(x,y, aColor):
+        self.Putpixel(x,y,aColor)
+        
     def Setpixel(self,x,y,aColor):
         self.Putpixel(x,y,aColor)
 
@@ -105,18 +114,62 @@ class PixelMatrix():
         self.OutputArray[Zeile * self.Width + Spalte] = color;
 
     def Black(self):
-        for i in range (0, self.Width ):
-            for j in range(0,self.Height):
+        for i in range (1, self.Width+1 ):
+            for j in range(1,self.Height+1):
                 #print(i,j)
                 self.Putpixel(i,j,[0,0,0])
     def White(self):
-        for i in range (0, self.Width ):
-            for j in range(0,self.Height):
+        for i in range (1, self.Width+1 ):
+            for j in range(1,self.Height+1):
+                #print(i,j)
+                self.Putpixel(i,j,[255,255,255])
+
+class PixelMatrix():
+    def __init__(self, Pixelserver='127.0.0.1', Port = 1337):
+        self.serverAddressPort = (Pixelserver, Port)
+        self.lastSend = int(round(time.time() * 1000))
+        self.Height = 33
+        self.Width  = 60
+
+        self.ClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+        self.ClientSocket.settimeout(0.1)
+        self.ClientSocket.connect(self.serverAddressPort) # TCP
+
+    def drawpixel(x,y, aColor):
+        self.Putpixel(x,y,aColor)
+    def Setpixel(self,x,y,aColor):
+        self.Putpixel(x,y,aColor)
+
+    def Putpixel(self,x,y,aColor):
+        if (x>0) and (y>0) and (x <= self.Width) and (y <= self.Height):
+            cmd = "PX %d %d #%s%s%s\n" % (x,y,format(aColor[0], '02x') ,format(aColor[1], '02x') ,format(aColor[2], '02x'))
+            self.ClientSocket.send(cmd.encode())
+
+    def Black(self):
+        for i in range (1, self.Width+1 ):
+            for j in range(1,self.Height+1):
+                #print(i,j)
+                self.Putpixel(i,j,[0,0,0])
+    def White(self):
+        for i in range (1, self.Width+1 ):
+            for j in range(1,self.Height+1):
                 #print(i,j)
                 self.Putpixel(i,j,[255,255,255])
 
 if __name__ == "__main__":
-    Matrix = PixelMatrix()
+    Matrix = UdpPixelMatrix()
+    Matrix.White()
+    #Matrix.Send()
+    time.sleep(1)
+    Matrix.Black()
+    #Matrix.Send()
+
+    import configparser
+    config = configparser.ConfigParser() 
+    config.read(r"..\..\..\MatrixHost.ini")
+    HOST = config.get("Pixelserver","host")
+
+    Matrix = PixelMatrix(HOST)
     Matrix.White()
     #Matrix.Send()
     time.sleep(1)
