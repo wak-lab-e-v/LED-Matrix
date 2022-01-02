@@ -20,7 +20,7 @@ from itertools import chain
 #https://wiki.maglab.space/wiki/PixelCompetition/Csharp
 
 config = configparser.ConfigParser() 
-config.read(r"..\..\MatrixHost.ini")
+config.read(r"MatrixHost.ini")
 
 HOST = config['Pixelserver']['Host']
 
@@ -213,37 +213,7 @@ if __name__ == '__main__':
     delay = 0.03
     #drawpixel(1,33, 100, 100, 0)
     #getPicture()
-    #CLR()
-    
-    #while True:
-    #    for i in range(20,100,4):
-    #        drawpixel(60,1, i, 0, 0)
-    #        time.sleep(delay)
-    #    for i in reversed(range(20,100,4)):
-    #        drawpixel(60,1, i, 0, 0)
-    #        time.sleep(delay)
-    #    for i in range(20,100,4):
-    #        drawpixel(60,1, 0, i, 0)
-    #        time.sleep(delay)
-    #    for i in reversed(range(20,100,4)):
-    #        drawpixel(60,1, 0, i, 0)
-    #        time.sleep(delay)
-    #    for i in range(20,100,4):
-    #        drawpixel(60,1, 0, 0, i)
-    #        time.sleep(delay)
-    #    for i in reversed(range(20,100,4)):
-    #        drawpixel(60,1, 0, 0, i)
-    #        time.sleep(delay)
-            
-
-        
-    #for i in range(0,10):
-    #    #sock.setblocking(0)
-    #    welkome=sock.recv(1024)
-    #    print(welkome[-6:-2])
-    #    if welkome[-6:-2] == b'1080':
-    #         breakp
-
-    pushpicturerandom(0, 0, 'w2.png')
+    CLR()
+    pushpicturerandom(0, 0, 'w.png')
 
     

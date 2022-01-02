@@ -7,7 +7,7 @@ import configparser
 
 
 config = configparser.ConfigParser() 
-config.read("MatrixHost.ini")
+config.read(r"MatrixHost.ini")
 
 HOST = config.get("Pixelserver","host")
 PORT = 1337
