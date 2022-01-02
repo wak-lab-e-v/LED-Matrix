@@ -62,43 +62,13 @@ class Window(tk.Frame):
         return img
 
 
-
-#while True:
-#    data, addr = serverSock.recvfrom(1024)
-#    print "Message: ", data
-
-
-
-
-def getPicture():
-##    cmd = "GM\n"
-##    try:
-##        Text=sock.recv(10) # socket.setblocking
-##    except socket.timeout:
-##        pass
-##    sock.send(cmd.encode())
-##    time.sleep(0.5)
-##    Text=sock.recv(3*2*width*height).decode()
-    img  = Image.new( mode = "RGB", size = (multiply*width, multiply*height), color= (0,0,0))
-##    try:
-##        bytesObj = codecs.decode(Text, 'hex_codec')
-##    except:
-##        print(Text)
-    index = 0
-    #print(bytesObj)
-
-    #maxsize = (multiply*width, multiply*height)
-    #img = img.resize(maxsize);
-    return img
-
-
 def accept_incoming_connections():
     """Sets up handling for incoming clients."""
     while not stop.isSet():
-        print("Wait for Client")
+        #print("Wait for Client")
         try:
           client_msg, client_address = UDPServerSocket.recvfrom(bufferSize)  
-          print("%s:%s has connected." % client_address)
+          #print("%s:%s has connected." % client_address)
         except:
           stop.set()
         msg2Matrix(client_msg)
@@ -127,9 +97,7 @@ def Decode5(msg):
             MatrixBuffer[index % width][Zeile] = color
         else:
             MatrixBuffer[(width-1)-(index % width)][Zeile] = color
-        
-    
-        
+         
 def msg2Matrix(msg):
     if len(msg) > 4:
         Type = msg[0]
@@ -137,7 +105,6 @@ def msg2Matrix(msg):
             Decode5(msg)
         if (Type == 4):  # WLED UDP Realtime Control ,Protokoll 4 DNRGB
             Decode4(msg)
-        
     
 if __name__ == '__main__':
     root = tk.Tk()
