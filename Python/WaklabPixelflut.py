@@ -205,7 +205,7 @@ def CLR():
     for i in range(33):
         for j in range(60):
             #if i % 2 != 0:
-            drawpixel(j,i, 0, 50, 00)
+            drawpixel(j,i, 0, 10, 00)
     
 
 

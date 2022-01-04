@@ -1,7 +1,7 @@
 import socket
 import time
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import Image, ImageDraw, ImageTk
 import codecs
 import configparser
 
@@ -51,6 +51,13 @@ class Window(tk.Frame):
 
 
 
+def DrawLed(aImg, x,y, multi, color):
+    draw = ImageDraw.Draw(aImg)
+    r    = round(multi / 5)
+    draw.ellipse((multi*x-r, multi*y-r, multi*x+r, multi*y+r), fill=color, outline=color)
+    #aImg.putpixel((multi*x-1, multi*y), (color[0],0,0))
+    #aImg.putpixel((multi*x+1, multi*y), (0,color[1],0))
+    #aImg.putpixel((multi*x, multi*y+1), (0,0,color[2]))
 
 
 
@@ -74,14 +81,11 @@ def getPicture():
     if len(bytesObj) >= 3*width*height: 
         for y in range(1,height+1):
             for x in range(1,width+1):
-                img.putpixel((multiply*x, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-                img.putpixel((multiply*x+1, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-                img.putpixel((multiply*x-1, multiply*y), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-                img.putpixel((multiply*x, multiply*y-1), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
-                img.putpixel((multiply*x, multiply*y+1), (bytesObj[index], bytesObj[index+1], bytesObj[index+2]) )
+                DrawLed(img, x,y, multiply, (bytesObj[index], bytesObj[index+1], bytesObj[index+2]))
                 index = index + 3
     maxsize = (multiply*width, multiply*height)
     img = img.resize(maxsize)
+    #img.save('img.png')
     return img
 
     

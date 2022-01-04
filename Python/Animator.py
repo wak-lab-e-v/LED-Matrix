@@ -90,11 +90,11 @@ def SendUDP(aMode, array):
 
 
 def one_word(r,g,b):
-    r1 = r if(r < 0x1f) else 0x1f
-    g1 = g if(g < 0x1f) else 0x1f
-    b1 = b if(b < 0x1f) else 0x1f
+    r1 = r if(r < 0x3f) else 0x3f
+    g1 = g if(g < 0x3f) else 0x3f
+    b1 = b if(b < 0x3f) else 0x3f
 
-    code = ((r1 & 0x1f) <<11) | ((g1 & 0x3f)<<5) | (b1 & 0x1f)
+    code = ((r1 & 0x3e) <<10) | ((g1 & 0x3f)<<5) | ((b1 & 0x3e)>>1)
     return [ (code  >> 8) & 0xff, code & 0xff, 0]
 
 def Putpixel(x,y,aColor):

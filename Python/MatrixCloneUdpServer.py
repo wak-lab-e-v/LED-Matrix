@@ -2,7 +2,7 @@ import socket
 import time
 import numpy as np
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import Image, ImageDraw, ImageTk
 import codecs
 
 from threading import Thread, Event
@@ -44,6 +44,15 @@ class Window(tk.Frame):
         #self.img.image = self.render
         #self.img.place(x=0, y=0)
         self.change_img()
+
+    def DrawLed(self, aImg, x,y, multi, color):
+        draw = ImageDraw.Draw(aImg)
+        r    = round(multi / 5)
+        draw.ellipse((multi*x-r, multi*y-r, multi*x+r, multi*y+r), fill=color, outline=color)
+        #aImg.putpixel((multi*x-1, multi*y), (color[0],0,0))
+        #aImg.putpixel((multi*x+1, multi*y), (0,color[1],0))
+        #aImg.putpixel((multi*x, multi*y+1), (0,0,color[2]))
+        
         
     def DrawBuffer(self, Buffer):
         #print(Buffer.shape)
@@ -53,12 +62,8 @@ class Window(tk.Frame):
             for i in range(Bwidth):
                 color = Buffer[i][j]
                 y = j + 1
-                x = i + 1 
-                img.putpixel((multiply*x, multiply*y), (color[0], color[1], color[2]) )
-                img.putpixel((multiply*x+1, multiply*y), (color[0], color[1], color[2]) )
-                img.putpixel((multiply*x-1, multiply*y), (color[0], color[1], color[2]) )
-                img.putpixel((multiply*x, multiply*y-1), (color[0], color[1], color[2]) )
-                img.putpixel((multiply*x, multiply*y+1), (color[0], color[1], color[2]) )
+                x = i + 1
+                self.DrawLed(img, x,y, multiply, (color[0]*3, color[1]*3, color[2]*3))
         return img
 
 
