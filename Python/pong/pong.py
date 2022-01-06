@@ -4,7 +4,6 @@ import random
 import numpy as np
 from pynput import keyboard
 import socket
-import pytesseract
 import urllib.request,io
 import configparser
 from pathlib import Path
@@ -37,6 +36,8 @@ Display_Height = 33
 Display_Width  = 60
 
 BOX_SIZE = [3,13]
+BLACK = [None,None,None,True] #defines the black color
+COLOR = [255,255,255,True] #defines the color of the game elements
 
 output_array = []
 
@@ -47,6 +48,7 @@ def Putpixel(x,y,rgb):
        or old[1] != rgb[1]
        or old[2] != rgb[2]):
         output_array[x][y] = rgb
+        print("changed!")
 
 def array_init():
     global output_array
@@ -66,31 +68,31 @@ def array_init():
     #print(output_array)
 
 def send():
-    #print(output_array[0][0])
     cmd = ""
     i=1
     for x in range(Display_Width):
         for y in range(Display_Height):
-            if(i%30==0):
+            """if(i%30==0):
                 i=0
                 sock.send(cmd.encode())
-                cmd = ""
+                cmd = """""
             x1 = x + offset_x
             y1 = y + offset_y
             #print(x1, y1)
             rgb = output_array[x][y]
-            if(rgb != [0,0,0]):
-                if(rgb == [None,None,None,True]):
+            #print(rgb)
+            if(rgb[3] == True):
+                if(rgb == BLACK):
                     cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=0, g=0, b=0)
-                elif (x1 <= Display_Width) and (y1 <= Display_Height) and (rgb[3]==True):
+                    output_array[x][y] = [BLACK[0],BLACK[1],BLACK[2],False]
+                elif (x1 <= Display_Width) and (y1 <= Display_Height):
                     #cmd = ("PX %d %d %d %d %d\n" % (x,y,r,g,b))
                     cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=rgb[0], g=rgb[1], b=rgb[2])
-                    #print(cmd)
-                rgb[3]=False
-                output_array[x][y] = rgb
+                    output_array[x][y] = [COLOR[0],COLOR[1],COLOR[2],False]
+
     sock.send(cmd.encode())
-    Text=sock.recv(30).decode()
-    print(Text)
+    #Text=sock.recv(30).decode()
+    #print(Text)
 
 #msgFromServer = UDPClientSocket.recvfrom(bufferSize)
 
@@ -161,10 +163,6 @@ def ball_move():
                 
         BALL_X += DIRECTION_X
         BALL_Y += DIRECTION_Y
-    
-
-BLACK = [None,None,None,True] #defines the black color
-COLOR = [255,255,255,True] #defines the color of the game elements
 
 LEFT = 10
 RIGHT = 10
@@ -208,7 +206,7 @@ def pong():
             Putpixel(x,y,BLACK)
  
     middle_line()
-    ball_move()
+    #ball_move()
     
     send()
 
@@ -237,8 +235,10 @@ def on_press(key):
             right(1)
 
         if(key.char == 'w'):
+            print("up")
             left(0)
         elif(key.char == 's'):
+            print("down")
             left(1)  
 
     except AttributeError:
