@@ -8,6 +8,8 @@ import urllib.request,io
 import configparser
 from pathlib import Path
 
+
+#read config for HOST
 path = Path(__file__).parent.parent
 # Returns a Pathlib object
 print(path)
@@ -28,8 +30,10 @@ PORT = 1337
 offset_x = 1
 offset_y = 1
 
+#create socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.settimeout(None)
+sock.settimeout(0.5)
+#sock.setblocking(False)
 sock.connect((HOST, PORT))
 
 Display_Height = 33
@@ -42,15 +46,14 @@ COLOR = [255,255,255,True] #defines the color of the game elements
 output_array = []
 
 def Putpixel(x,y,rgb):
+    """sets the value for the desired pixel"""
     global output_array
     old = output_array[x][y]
-    if(old[0]!=rgb[0]
-       or old[1] != rgb[1]
-       or old[2] != rgb[2]):
+    if(rgb!=old):
         output_array[x][y] = rgb
-        print("changed!")
 
 def array_init():
+    """fills the main array with zeros and resets the matrix with black"""
     global output_array
     output_array = [[[0,0,0,False] for x in range(Display_Height)] for x in range(Display_Width)]
     cmd = ""
@@ -68,35 +71,44 @@ def array_init():
     #print(output_array)
 
 def send():
+    """sends the command via tcp to the Pixelserver"""
+    global sock
+    #reset the command
     cmd = ""
-    i=1
     for x in range(Display_Width):
         for y in range(Display_Height):
-            """if(i%30==0):
-                i=0
-                sock.send(cmd.encode())
-                cmd = """""
             x1 = x + offset_x
             y1 = y + offset_y
-            #print(x1, y1)
+            #getting the colors from the main array
             rgb = output_array[x][y]
-            #print(rgb)
+            #adding values to the command if they are new/changed
             if(rgb[3] == True):
                 if(rgb == BLACK):
                     cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=0, g=0, b=0)
+                    #saving the values as changed (True->False)
                     output_array[x][y] = [BLACK[0],BLACK[1],BLACK[2],False]
                 elif (x1 <= Display_Width) and (y1 <= Display_Height):
                     #cmd = ("PX %d %d %d %d %d\n" % (x,y,r,g,b))
                     cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=rgb[0], g=rgb[1], b=rgb[2])
+                    #saving the values as changed (True->False)
                     output_array[x][y] = [COLOR[0],COLOR[1],COLOR[2],False]
-
-    sock.send(cmd.encode())
-    #Text=sock.recv(30).decode()
-    #print(Text)
-
-#msgFromServer = UDPClientSocket.recvfrom(bufferSize)
+    if(cmd!=""):
+        #send only if command is not empty
+        try:
+            sock.send(cmd.encode())
+        except:
+            #reconnect if timeout occured
+            sock.close()
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(0.5)
+            try:
+                sock.connect((HOST, PORT))
+                sock.send(cmd.encode())
+            except:
+                print("socket error")
 
 def middle_line():
+    """draws the middle line"""
     i = 0
     black = True
     start = int(Display_Width/2 -1)
@@ -115,16 +127,18 @@ def middle_line():
         
         i +=1
 
+
 BALL_X = int(Display_Width/2)
 BALL_Y = int(Display_Height/2)
 BALLSIZE = 4
 DIRECTION_X = 0
 DIRECTION_Y = 0
 
-SPEED = 1000
+SPEED = 500000
 START_TIME = datetime.datetime.now()
 
 def ball_init():
+    """initiates the ball movement"""
     global DIRECTION_X, DIRECTION_Y
     dir_x = random.randint(0,1)
     dir_y = random.randint(0,1)
@@ -139,11 +153,15 @@ def ball_init():
         DIRECTION_Y = 1    
 
 def ball_move():
+    """moves the ball around"""
     global BALL_X,BALL_Y,DIRECTION_Y,DIRECTION_X,START_TIME
     now = datetime.datetime.now()
-    if(now.microsecond > START_TIME.microsecond + SPEED):
+    start = START_TIME.microsecond +SPEED
+    if(start>1000000):
+        start = start - 1000000
+    #print(now.microsecond,start)
+    if(now.microsecond >= start): # only move every x microseconds
         START_TIME = now
-            
         for y in range(BALL_Y-DIRECTION_Y,BALL_Y+BALLSIZE-DIRECTION_Y):
             for x in range(BALL_X-DIRECTION_X, BALL_X+BALLSIZE-DIRECTION_X):
                 Putpixel(x,y,BLACK)
@@ -156,9 +174,9 @@ def ball_move():
                     continue
                 Putpixel(x,y,COLOR)
         
-        if(BALL_Y+BALLSIZE == Display_Height or BALL_Y == 0):
+        if(BALL_Y+BALLSIZE >= Display_Height or BALL_Y <= 0): #change movement direction if border is hit
             DIRECTION_Y = DIRECTION_Y * (-1)
-        if(BALL_X+BALLSIZE == Display_Width or BALL_X == 0):
+        if(BALL_X+BALLSIZE >= Display_Width or BALL_X <= 0): #change movement direction if border is hit
             DIRECTION_X = DIRECTION_X * (-1)
                 
         BALL_X += DIRECTION_X
@@ -168,6 +186,7 @@ LEFT = 10
 RIGHT = 10
 #Create the left and right pixelbox
 def pong():
+    """main function for pong"""
     global LEFT, RIGHT
     #left
     
@@ -179,6 +198,7 @@ def pong():
     
     y_end = BOX_SIZE[1]+LEFT
     
+    #draw left box
     for x in range(BOX_SIZE[0]):
         for y in range(LEFT, y_end):
             Putpixel(x,y,COLOR)
@@ -197,6 +217,7 @@ def pong():
     x_start = Display_Width-BOX_SIZE[0]
     x_end = Display_Width
     y_end = BOX_SIZE[1]+RIGHT
+    #draw right box
     for x in range(x_start, x_end):
         for y in range(RIGHT, y_end):
             Putpixel(x,y,COLOR)
@@ -204,13 +225,14 @@ def pong():
             Putpixel(x,y,BLACK)
         for y in range(y_end, Display_Height):
             Putpixel(x,y,BLACK)
- 
+
     middle_line()
-    #ball_move()
+    ball_move()
     
     send()
 
 def right(direction):
+    """moves the right box"""
     global RIGHT
     if (direction==0):
         RIGHT -= 1
@@ -218,6 +240,7 @@ def right(direction):
         RIGHT += 1
 
 def left(direction):
+    """moves the left box"""
     global LEFT
     if(direction==0):
         LEFT -= 1
@@ -225,6 +248,7 @@ def left(direction):
         LEFT += 1
      
 def on_press(key):
+    """listens for key-presses"""
     try:
         #print('alphanumeric key {0} pressed'.format(
         #    key))
@@ -235,10 +259,8 @@ def on_press(key):
             right(1)
 
         if(key.char == 'w'):
-            print("up")
             left(0)
         elif(key.char == 's'):
-            print("down")
             left(1)  
 
     except AttributeError:
