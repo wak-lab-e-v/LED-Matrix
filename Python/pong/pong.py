@@ -30,20 +30,24 @@ PORT = 1337
 offset_x = 1
 offset_y = 1
 
-#create socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.settimeout(0.5)
-#sock.setblocking(False)
-sock.connect((HOST, PORT))
-
 Display_Height = 33
 Display_Width  = 60
 
 BOX_SIZE = [3,13]
 BLACK = [None,None,None,True] #defines the black color
 COLOR = [255,255,255,True] #defines the color of the game elements
-
+SOCKET_NUMBER = 3
 output_array = []
+socket_array = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for x in range(SOCKET_NUMBER)]
+
+def sockets():
+    """creates multiple socket connections"""
+    global socket_array
+    for i in range(SOCKET_NUMBER):
+        socket_array[i].settimeout(0.5)
+        socket_array[i].connect((HOST,PORT))
+
+sockets()
 
 def Putpixel(x,y,rgb):
     """sets the value for the desired pixel"""
@@ -67,14 +71,15 @@ def array_init():
                 #cmd = ("PX %d %d %d %d %d\n" % (x,y,r,g,b))
                 cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=0, g=0, b=0)
                 #print(cmd)
-    sock.send(cmd.encode())
+    socket_array[0].send(cmd.encode())
     #print(output_array)
 
 def send():
     """sends the command via tcp to the Pixelserver"""
-    global sock
+    global socket_array
     #reset the command
     cmd = ""
+    i=0
     for x in range(Display_Width):
         for y in range(Display_Height):
             x1 = x + offset_x
@@ -92,20 +97,28 @@ def send():
                     cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=rgb[0], g=rgb[1], b=rgb[2])
                     #saving the values as changed (True->False)
                     output_array[x][y] = [COLOR[0],COLOR[1],COLOR[2],False]
-    if(cmd!=""):
-        #send only if command is not empty
-        try:
-            sock.send(cmd.encode())
-        except:
-            #reconnect if timeout occured
-            sock.close()
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(0.5)
+        
+        if(cmd!=""):
+            #send only if command is not empty
             try:
-                sock.connect((HOST, PORT))
-                sock.send(cmd.encode())
+                socket_array[i].send(cmd.encode())
+                cmd=""
             except:
-                print("socket error")
+                #reconnect if timeout occured
+                socket_array[i].close()
+                socket_array[i] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                socket_array[i].settimeout(0.5)
+                try:
+                    socket_array[i].connect((HOST, PORT))
+                    socket_array[i].send(cmd.encode())
+                    cmd=""
+                except:
+                    print("socket error")
+
+            i+=1
+
+            if(i % SOCKET_NUMBER == 0):
+                i=0
 
 def middle_line():
     """draws the middle line"""
@@ -134,7 +147,7 @@ BALLSIZE = 4
 DIRECTION_X = 0
 DIRECTION_Y = 0
 
-SPEED = 500000
+SPEED = 0.5
 START_TIME = datetime.datetime.now()
 
 def ball_init():
@@ -156,11 +169,11 @@ def ball_move():
     """moves the ball around"""
     global BALL_X,BALL_Y,DIRECTION_Y,DIRECTION_X,START_TIME
     now = datetime.datetime.now()
-    start = START_TIME.microsecond +SPEED
+    start = START_TIME.second +SPEED
     if(start>1000000):
         start = start - 1000000
     #print(now.microsecond,start)
-    if(now.microsecond >= start): # only move every x microseconds
+    if(now.second >= start): # only move every x microseconds
         START_TIME = now
         for y in range(BALL_Y-DIRECTION_Y,BALL_Y+BALLSIZE-DIRECTION_Y):
             for x in range(BALL_X-DIRECTION_X, BALL_X+BALLSIZE-DIRECTION_X):
