@@ -76,7 +76,7 @@ def getPicture():
         bytesObj = codecs.decode(Text, 'hex_codec')
     except:
         bytesObj = codecs.decode('00', 'hex_codec')
-        #print(Text)
+        print(Text)
         Text=sock.recv(3*2*width*height).decode()
     index = 0
     if len(bytesObj) >= 3*width*height: 
