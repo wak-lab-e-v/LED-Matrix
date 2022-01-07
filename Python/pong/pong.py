@@ -1,6 +1,7 @@
 import socket
 import datetime
 import random
+from tkinter.constants import FALSE
 import numpy as np
 from pynput import keyboard
 import socket
@@ -8,7 +9,7 @@ import urllib.request,io
 import configparser
 from pathlib import Path
 
-import MatrixClone
+import time
 
 
 #read config for HOST
@@ -36,11 +37,14 @@ Display_Height = 33
 Display_Width  = 60
 
 BOX_SIZE = [3,13]
-BLACK = [None,None,None,True] #defines the black color
-COLOR = [255,255,255,True] #defines the color of the game elements
+BLACK = [0,0,0] #defines the black color
+COLOR = [255,255,255] #defines the color of the game elements
 SOCKET_NUMBER = 1
 output_array = []
 socket_array = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for x in range(SOCKET_NUMBER)]
+
+MAIN=False
+remote_array = [[[0,0,0] for x in range(Display_Height)] for x in range(Display_Width)]
 
 def sockets():
     """creates multiple socket connections"""
@@ -51,19 +55,18 @@ def sockets():
 
 sockets()
 
-def Putpixel(x,y,rgb):
+def Putpixel(x,y,color):
     """sets the value for the desired pixel"""
     global output_array
-    old = output_array[x][y]
-    if(rgb!=old):
-        output_array[x][y] = rgb
+    output_array.append([x,y,color])
+    if(MAIN==False):
+        remote_array[x][y] = color
+        #print(remote_array)
 
 def array_init():
-    """fills the main array with zeros and resets the matrix with black"""
-    global output_array
-    output_array = [[[0,0,0,False] for x in range(Display_Height)] for x in range(Display_Width)]
-    cmd = ""
-    
+    """resets the matrix with black"""  
+
+    cmd=""  
     for x in range(Display_Width):
         for y in range(Display_Height):
             x1 = x + offset_x
@@ -71,58 +74,49 @@ def array_init():
             #print(x1, y1)
             if (x1 <= Display_Width) and (y1 <= Display_Height):
                 #cmd = ("PX %d %d %d %d %d\n" % (x,y,r,g,b))
-                cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=0, g=0, b=0)
+                cmd = cmd+ "PX {x_val} {y_val} #000000\n".format(x_val = x1,y_val = y1)
                 #print(cmd)
     socket_array[0].send(cmd.encode())
-    #print(output_array)
-    #MatrixClone.start()
 
 def send():
     """sends the command via tcp to the Pixelserver"""
-    global socket_array
+    global socket_array,output_array
     #reset the command
     cmd = ""
     i=0
-    for x in range(Display_Width):
-        for y in range(Display_Height):
-            x1 = x + offset_x
-            y1 = y + offset_y
-            #getting the colors from the main array
-            rgb = output_array[x][y]
-            #adding values to the command if they are new/changed
-            if(rgb[3] == True):
-                if(rgb == BLACK):
-                    cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=0, g=0, b=0)
-                    #saving the values as changed (True->False)
-                    output_array[x][y] = [BLACK[0],BLACK[1],BLACK[2],False]
-                elif (x1 <= Display_Width) and (y1 <= Display_Height):
-                    #cmd = ("PX %d %d %d %d %d\n" % (x,y,r,g,b))
-                    cmd = cmd+ "PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val = x1,y_val = y1, r=rgb[0], g=rgb[1], b=rgb[2])
-                    #saving the values as changed (True->False)
-                    output_array[x][y] = [COLOR[0],COLOR[1],COLOR[2],False]
-        
-            if(cmd!=""):
-                #send only if command is not empty
-                try:
-                    socket_array[i].send(cmd.encode())
-                    cmd=""
-                except:
-                    #reconnect if timeout occured
-                    socket_array[i].close()
-                    socket_array[i] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    socket_array[i].settimeout(0.5)
-                    try:
-                        socket_array[i].connect((HOST, PORT))
-                        socket_array[i].send(cmd.encode())
-                        cmd=""
-                    except:
-                        print("socket error")
+    length = len(output_array)
+    sock_error = False
 
-                i+=1
+    while (i<length):
+        val = output_array[i]
+        x1 = val[0] + offset_x
+        y1 = val[1] + offset_y
+        color = val[2]
 
-                if(i % SOCKET_NUMBER == 0):
-                    i=0
-                #time.sleep(0.01)
+        #print(val)
+        cmd=cmd+"PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val=x1,y_val=y1,r=color[0],g=color[1],b=color[2])
+        #print(cmd)
+        i+=1
+    try:
+        #print(cmd)
+        socket_array[0].send(cmd.encode())
+        #text = socket_array[0].recv(1024).decode()
+        #print(text)
+        #time.sleep(100000)
+    except:
+        #reconnect to the socket
+        socket_array[0].close()
+        socket_array[0] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        socket_array[0].settimeout(0.5)
+        try:
+            socket_array[0].connect((HOST, PORT))
+            socket_array[0].send(cmd.encode())
+        except:
+            print("socket error")
+            sock_error = True
+    
+    if(not sock_error):
+        output_array.clear()
 
 def middle_line():
     """draws the middle line"""
@@ -174,8 +168,6 @@ def ball_move():
     global BALL_X,BALL_Y,DIRECTION_Y,DIRECTION_X,START_TIME
     now = datetime.datetime.now()
     start = START_TIME.second +SPEED
-    if(start>1000000):
-        start = start - 1000000
     #print(now.microsecond,start)
     if(now.second >= start): # only move every x microseconds
         START_TIME = now
@@ -204,27 +196,23 @@ RIGHT = 10
 #Create the left and right pixelbox
 def pong():
     """main function for pong"""
-    global LEFT, RIGHT
-    #left
-    
-    #check if left is too high
-    if(LEFT > Display_Height - BOX_SIZE[1]):
-        LEFT = Display_Height - BOX_SIZE[1]
-    elif(LEFT < 0):
-        LEFT = 0
-    
-    y_end = BOX_SIZE[1]+LEFT
-    
-    #draw left box
-    for x in range(BOX_SIZE[0]):
-        for y in range(LEFT, y_end):
-            Putpixel(x,y,COLOR)
-        for y in range(LEFT):
-            Putpixel(x,y,BLACK)
-        for y in range(y_end, Display_Height):
-            Putpixel(x,y,BLACK)
-        
-    
+    global output_array
+    middle_line()
+    ball_move()
+    if(MAIN):
+        send()
+    else:
+        output_array.clear()
+
+
+def right(direction):
+    """moves the right box"""
+    global RIGHT
+    if (direction==0):
+        RIGHT -= 1
+    elif(direction==1):
+        RIGHT += 1
+
     #right
     if(RIGHT > Display_Height - BOX_SIZE[1]):
         RIGHT = Display_Height - BOX_SIZE[1]
@@ -243,19 +231,6 @@ def pong():
         for y in range(y_end, Display_Height):
             Putpixel(x,y,BLACK)
 
-    middle_line()
-    ball_move()
-    
-    send()
-
-def right(direction):
-    """moves the right box"""
-    global RIGHT
-    if (direction==0):
-        RIGHT -= 1
-    elif(direction==1):
-        RIGHT += 1
-
 def left(direction):
     """moves the left box"""
     global LEFT
@@ -263,6 +238,23 @@ def left(direction):
         LEFT -= 1
     elif(direction==1):
         LEFT += 1
+    
+    #check if left is too high
+    if(LEFT > Display_Height - BOX_SIZE[1]):
+        LEFT = Display_Height - BOX_SIZE[1]
+    elif(LEFT < 0):
+        LEFT = 0
+    
+    y_end = BOX_SIZE[1]+LEFT
+    
+    #draw left box
+    for x in range(BOX_SIZE[0]):
+        for y in range(LEFT, y_end):
+            Putpixel(x,y,COLOR)
+        for y in range(LEFT):
+            Putpixel(x,y,BLACK)
+        for y in range(y_end, Display_Height):
+            Putpixel(x,y,BLACK)
      
 def on_press(key):
     """listens for key-presses"""
@@ -285,11 +277,6 @@ def on_press(key):
 
 #msg = "Message from Server {}".format(msgFromServer[0])
 
-def return_points():
-    global output_array
-    print(output_array)
-    return output_array
-
 listener = keyboard.Listener(
     on_press=on_press)
 listener.start()
@@ -300,5 +287,6 @@ def pong_init():
 
 if __name__ == "__main__":
     pong_init()
+    MAIN = True
     while True:
         pong()

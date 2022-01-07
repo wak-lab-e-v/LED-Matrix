@@ -67,7 +67,7 @@ def getPicture():
     img  = Image.new( mode = "RGB", size = (multiply*(width+1), multiply*(height+1)), color= (0,0,0))
     for y in range(height):
         for x in range(width):
-            colors = pong.output_array
+            colors = pong.remote_array
             try:
                 colors = colors[x][y]
                 DrawLed(img, x,y, multiply, ("#{r:02X}{g:02X}{b:02X}".format(r=colors[0],g=colors[1],b=colors[2])))
