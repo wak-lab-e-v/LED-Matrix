@@ -8,6 +8,8 @@ import urllib.request,io
 import configparser
 from pathlib import Path
 
+import MatrixClone
+
 
 #read config for HOST
 path = Path(__file__).parent.parent
@@ -36,7 +38,7 @@ Display_Width  = 60
 BOX_SIZE = [3,13]
 BLACK = [None,None,None,True] #defines the black color
 COLOR = [255,255,255,True] #defines the color of the game elements
-SOCKET_NUMBER = 3
+SOCKET_NUMBER = 1
 output_array = []
 socket_array = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for x in range(SOCKET_NUMBER)]
 
@@ -73,6 +75,7 @@ def array_init():
                 #print(cmd)
     socket_array[0].send(cmd.encode())
     #print(output_array)
+    #MatrixClone.start()
 
 def send():
     """sends the command via tcp to the Pixelserver"""
@@ -98,27 +101,28 @@ def send():
                     #saving the values as changed (True->False)
                     output_array[x][y] = [COLOR[0],COLOR[1],COLOR[2],False]
         
-        if(cmd!=""):
-            #send only if command is not empty
-            try:
-                socket_array[i].send(cmd.encode())
-                cmd=""
-            except:
-                #reconnect if timeout occured
-                socket_array[i].close()
-                socket_array[i] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                socket_array[i].settimeout(0.5)
+            if(cmd!=""):
+                #send only if command is not empty
                 try:
-                    socket_array[i].connect((HOST, PORT))
                     socket_array[i].send(cmd.encode())
                     cmd=""
                 except:
-                    print("socket error")
+                    #reconnect if timeout occured
+                    socket_array[i].close()
+                    socket_array[i] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    socket_array[i].settimeout(0.5)
+                    try:
+                        socket_array[i].connect((HOST, PORT))
+                        socket_array[i].send(cmd.encode())
+                        cmd=""
+                    except:
+                        print("socket error")
 
-            i+=1
+                i+=1
 
-            if(i % SOCKET_NUMBER == 0):
-                i=0
+                if(i % SOCKET_NUMBER == 0):
+                    i=0
+                #time.sleep(0.01)
 
 def middle_line():
     """draws the middle line"""
@@ -147,7 +151,7 @@ BALLSIZE = 4
 DIRECTION_X = 0
 DIRECTION_Y = 0
 
-SPEED = 0.5
+SPEED = 0.000000001
 START_TIME = datetime.datetime.now()
 
 def ball_init():
@@ -280,6 +284,11 @@ def on_press(key):
         pass
 
 #msg = "Message from Server {}".format(msgFromServer[0])
+
+def return_points():
+    global output_array
+    print(output_array)
+    return output_array
 
 listener = keyboard.Listener(
     on_press=on_press)
