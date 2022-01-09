@@ -8,7 +8,6 @@
 
 #include "ssid.h"
 int status = WL_IDLE_STATUS;
-char server[] = SERVER;
 
 #define UDP_PORT 21324
 
@@ -44,14 +43,6 @@ uint32_t width, height;
 WiFiClient client;
 boolean Connected;
 
-/* Similar to above, but for an 8-bit gamma-correction table.
-   Copy & paste this snippet into a Python REPL to regenerate:
-import math
-gamma=2.6
-for x in range(256):
-    print("{:3},".format(int(math.pow((x)/255.0,gamma)*255.0+0.5))),
-    if x&15 == 15: print
-*/
 static const uint8_t PROGMEM _GammaTable[256] = {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  1,  1,  1,
@@ -81,7 +72,6 @@ void SPI_Output_octet(const uint8_t value, uint8_t* eight_byte_buffer) {
     {
       eight_byte_buffer[i] = (value & mask) ? WS2812_PWM_ONE : WS2812_PWM_ZERO;
       mask = mask >> 1;
-      //eight_byte_buffer[i] = pgm_read_byte(&_BitTable[offset++]); 
     }
 }
 
@@ -325,9 +315,6 @@ void doBitmap(uint8_t *buffer, const size_t size, uint32_t width)
   dumpMemory(buffer , 100);
   for (uint16_t i=offset;i<size;i++)
   {
-  
-  
-    
     Pixelnr = (i-offset);
     if (!(int(Pixelnr / width) & 1)) // ungerade
     {
@@ -347,8 +334,6 @@ void doBitmap(uint8_t *buffer, const size_t size, uint32_t width)
         RGB_correct = 0;
       } 
       RGB_correct++; 
-     
-    
     }
     else
     {
@@ -391,8 +376,8 @@ void doNeo(uint8_t *buffer, const size_t size)
         RGB_correct = -1;
       else RGB_correct = 0;
                   
-      if (brigness > 40) 
-        brigness = 40;
+      if (brigness > 0x3f) //  Heiligkeit immer noch auf 63 begrenzen 2,6A Ruhe + (0,362 * 63 * 2000)
+        brigness = 0x3f;
       SPI_Output_octet(brigness,led_stream_buf+(8*(offest+i)));
     }
   }
@@ -408,9 +393,9 @@ void doNeo(uint8_t *buffer, const size_t size)
       if (!(i % 2))
       {
         code = (buffer[i+1] + (buffer[i]  << 8));
-        r = (code >> 11) & 0x1f;
+        r = (code >> 10) & 0x3e;
         g = (code >> 5)  & 0x3f;
-        b = code  & 0x1f;
+        b = (code << 1)  & 0x3f;
 
         j = i / 2; 
         SPI_Output_octet(g,led_stream_buf+(8*(offest+j*3+0))); // G

@@ -85,7 +85,6 @@ void SPI_Output_octet(const uint8_t value, uint8_t* eight_byte_buffer) {
     {
       eight_byte_buffer[i] = (value & mask) ? WS2812_PWM_ONE : WS2812_PWM_ZERO;
       mask = mask >> 1;
-      //eight_byte_buffer[i] = pgm_read_byte(&_BitTable[offset++]); 
     }
 }
 
@@ -364,9 +363,9 @@ void doASCIImap(uint8_t *buffer, const size_t size, uint32_t width, uint32_t hei
   } 
 }
 
-void doBitmap(uint8_t *buffer, const size_t size, uint32_t width)
+void doBitmap(uint8_t *buffer, const size_t size, uint32_t width, uint32_t height, uint16_t offset = 0x36)
 {
-  uint16_t offset = 0x36;
+  uint16_t matrixsize = width*height;
   uint16_t index;
   uint16_t Pixelnr;
   uint8_t  brigness;
@@ -374,12 +373,9 @@ void doBitmap(uint8_t *buffer, const size_t size, uint32_t width)
   // Bitmap Snacke
   uint16_t Lineend= 0;
   width = 3*width;
-  dumpMemory(buffer , 100);
+  //dumpMemory(buffer , 100);
   for (uint16_t i=offset;i<size;i++)
   {
-  
-  
-    
     Pixelnr = (i-offset);
     if (!(int(Pixelnr / width) & 1)) // ungerade
     {
@@ -399,8 +395,6 @@ void doBitmap(uint8_t *buffer, const size_t size, uint32_t width)
         RGB_correct = 0;
       } 
       RGB_correct++; 
-     
-    
     }
     else
     {
@@ -419,8 +413,8 @@ void doBitmap(uint8_t *buffer, const size_t size, uint32_t width)
 
     }
     
-    if (brigness > 40) 
-      brigness = 40;
+    if (brigness > 60) 
+      brigness = 60;
     
     if (index < (BUFFER_SIZE-8))
       SPI_Output_octet(brigness,led_stream_buf+(index));
@@ -443,8 +437,8 @@ void doNeo(uint8_t *buffer, const size_t size)
         RGB_correct = -1;
       else RGB_correct = 0;
                   
-      if (brigness > 40) 
-        brigness = 40;
+      if (brigness > 0x3f) //  Heiligkeit immer noch auf 63 begrenzen 2,6A Ruhe + (0,362 * 63 * 2000)
+        brigness = 0x3f;
       SPI_Output_octet(brigness,led_stream_buf+(8*(offest+i)));
     }
   }
@@ -460,9 +454,9 @@ void doNeo(uint8_t *buffer, const size_t size)
       if (!(i % 2))
       {
         code = (buffer[i+1] + (buffer[i]  << 8));
-        r = (code >> 11) & 0x1f;
+        r = (code >> 10) & 0x3e;
         g = (code >> 5)  & 0x3f;
-        b = code  & 0x1f;
+        b = (code << 1)  & 0x3f;
 
         j = i / 2; 
         SPI_Output_octet(g,led_stream_buf+(8*(offest+j*3+0))); // G
@@ -553,7 +547,8 @@ void loop(){
           bitmapbuffer[bitmappointer++] = client.read();
         } 
       }
-      if (bitmappointer > 6*MATRIX_WIDTH*MATRIX_HEIGHT)
+      //if (bitmappointer > 6*MATRIX_WIDTH*MATRIX_HEIGHT)
+      if (bitmappointer > 3*MATRIX_WIDTH*MATRIX_HEIGHT)
       {
         while (client.available()) 
           client.read();
@@ -574,8 +569,11 @@ void loop(){
         // dumpMemory(bitmapbuffer , 100); // 0D 0A 0D 0A | 42 4D
         //uint16_t startbmp = SearchBitmapHeader(bitmapbuffer , 500, &width, &height);
         //doBitmap(bitmapbuffer+startbmp, BITMAP_SIZE-startbmp, width);
-        if (bitmappointer == MATRIX_WIDTH*MATRIX_HEIGHT*6+2)
-          doASCIImap(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
+        
+        //if (bitmappointer == MATRIX_WIDTH*MATRIX_HEIGHT*6+2)
+        //  doASCIImap(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
+        if ((bitmappointer >= MATRIX_WIDTH*MATRIX_HEIGHT*3) && (bitmappointer < MATRIX_WIDTH*MATRIX_HEIGHT*3+6))
+          doBitmap(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT, 0);
         Connected = client.connected();
         if (Connected)
         {
