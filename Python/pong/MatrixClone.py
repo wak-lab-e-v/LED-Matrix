@@ -4,10 +4,11 @@ import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
 import codecs
 import configparser
+from pathlib import Path
+import pong
 
-
+path = Path(__file__).parent.parent
 config = configparser.ConfigParser() 
-#config.read(r"..\..\MatrixHost.ini")
 config.read("{}/MatrixHost.ini".format(path))
 HOST = config.get("Pixelserver","host")
 PORT = 1337
@@ -63,39 +64,27 @@ def DrawLed(aImg, x,y, multi, color):
 
 
 def getPicture():
-    cmd = "GM\n"
-    try:
-        Text=sock.recv(10) # socket.setblocking
-    except socket.timeout:
-        pass
-    sock.send(cmd.encode())
-    time.sleep(0.5)
-    Answer=sock.recv(3*2*width*height+5)
     img  = Image.new( mode = "RGB", size = (multiply*(width+1), multiply*(height+1)), color= (0,0,0))
-    try:
-        #old
-        #Text = Answer.decode()
-        #bytesObj = codecs.decode(Text, 'hex_codec')
-        bytesObj = Answer[:-2]
-        print(bytesObj)
-        print(len(bytesObj))
-    except:
-        #bytesObj = codecs.decode('00', 'hex_codec')
-        #print(len(Test), Text)
-        #Text=sock.recv(3*2*width*height).decode()
-        pass
-    index = 0
-    if len(bytesObj) >= 3*width*height: 
-        for y in range(1,height+1):
-            for x in range(1,width+1):
-                DrawLed(img, x,y, multiply, (bytesObj[index], bytesObj[index+1], bytesObj[index+2]))
-                index = index + 3
+    for y in range(height):
+        for x in range(width):
+            colors = pong.remote_array
+            try:
+                colors = colors[x][y]
+                DrawLed(img, x,y, multiply, ("#{r:02X}{g:02X}{b:02X}".format(r=colors[0],g=colors[1],b=colors[2])))
+            except:
+                pass
     maxsize = (multiply*width, multiply*height)
     img = img.resize(maxsize)
     #img.save('img.png')
     return img
 
-    
+def start():
+    root = tk.Tk()
+    app = Window(root)
+    root.wm_title("Matrix window")
+    root.geometry("%dx%d" % (multiply*width, multiply*height))
+    #root.geometry("1000x1000")
+    root.mainloop()
 if __name__ == '__main__':
 
 
@@ -104,7 +93,12 @@ if __name__ == '__main__':
     root.wm_title("Matrix window")
     root.geometry("%dx%d" % (multiply*width, multiply*height))
     #root.geometry("1000x1000")
-    root.mainloop()
+    #root.mainloop()
+
+    pong.pong_init()
+    while True:
+        pong.pong()
+        root.update()
 
 
 
