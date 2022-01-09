@@ -4,8 +4,9 @@ import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
 import codecs
 import configparser
+from pathlib import Path
 
-
+path = Path(__file__).parent
 config = configparser.ConfigParser() 
 #config.read(r"..\..\MatrixHost.ini")
 config.read("{}/MatrixHost.ini".format(path))
