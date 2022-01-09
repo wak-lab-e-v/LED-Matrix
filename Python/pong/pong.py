@@ -94,15 +94,15 @@ def send():
         color = val[2]
 
         #print(val)
-        cmd=cmd+"PX {x_val} {y_val} #{r:02X}{g:02X}{b:02X}\n".format(x_val=x1,y_val=y1,r=color[0],g=color[1],b=color[2])
+        cmd=cmd+f"PX {x1} {y1} {color[0]} {color[1]} {color[2]}\n"
         #print(cmd)
         i+=1
     try:
-        #print(cmd)
+        print(cmd)
         socket_array[0].send(cmd.encode())
-        #text = socket_array[0].recv(1024).decode()
-        #print(text)
-        #time.sleep(100000)
+        text = socket_array[0].recv(1024).decode()
+        print(text)
+        time.sleep(100000)
     except:
         #reconnect to the socket
         socket_array[0].close()
