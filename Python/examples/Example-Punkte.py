@@ -2,7 +2,8 @@ import PixelMatrix
 import configparser
 config = configparser.ConfigParser() 
 config.read(r"..\..\..\MatrixHost.ini")
-HOST = config.get("Pixelserver","host")
+HOST = config.get("Pixelserver","Host")
+UDP_HOST = config.get("WLED Server","Host")
 
 # Additive Farbmischung
 # aus Rot, Grün und Blauanteil
@@ -16,7 +17,7 @@ Lila  = (200,100,200)
 # der Klasse PixelMatrix() aus der PixelMatrix Bibliothek
 # Dies übernimmt für uns alles, was wir zum Pixeln brauchen.
 # Wir müssen uns nun nur noch um das setzen der Pixel kümmern
-#Matrix = PixelMatrix.UdpPixelMatrix()
+#Matrix = PixelMatrix.UdpPixelMatrix(UDP_HOST)
 Matrix = PixelMatrix.PixelMatrix(HOST)
 Matrix.Black()
 

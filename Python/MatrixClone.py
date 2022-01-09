@@ -69,14 +69,20 @@ def getPicture():
         pass
     sock.send(cmd.encode())
     time.sleep(0.5)
-    Text=sock.recv(3*2*width*height).decode()
+    Answer=sock.recv(3*2*width*height+2)
     img  = Image.new( mode = "RGB", size = (multiply*(width+1), multiply*(height+1)), color= (0,0,0))
     try:
-        bytesObj = codecs.decode(Text, 'hex_codec')
+        #old
+        #Text = Answer.decode()
+        #bytesObj = codecs.decode(Text, 'hex_codec')
+        bytesObj = Answer[:-2]
+        print(bytesObj)
+        print(len(bytesObj))
     except:
-        bytesObj = codecs.decode('00', 'hex_codec')
-        print(len(Test), Text)
-        Text=sock.recv(3*2*width*height).decode()
+        #bytesObj = codecs.decode('00', 'hex_codec')
+        #print(len(Test), Text)
+        #Text=sock.recv(3*2*width*height).decode()
+        pass
     index = 0
     if len(bytesObj) >= 3*width*height: 
         for y in range(1,height+1):

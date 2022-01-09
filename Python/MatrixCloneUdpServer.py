@@ -15,12 +15,12 @@ ADDR        = (UDP_IP_ADDRESS, UDP_PORT_NO)
 
 width = 60
 height = 33
-multiply = 8
+multiply = 18
 offset_x = 1
 offset_y = 1
 
 MatrixBuffer = np.zeros(shape=(width,height,3), dtype=int)
-
+count= 1
 
 class Window(tk.Frame):      
     def change_img(self):
@@ -64,6 +64,9 @@ class Window(tk.Frame):
                 y = j + 1
                 x = i + 1
                 self.DrawLed(img, x,y, multiply, (color[0]*3, color[1]*3, color[2]*3))
+        global count
+        img.save('img_'+str(count).zfill(5)+'.png')
+        count = count + 1
         return img
 
 

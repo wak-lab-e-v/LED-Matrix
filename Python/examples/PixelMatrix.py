@@ -167,8 +167,10 @@ if __name__ == "__main__":
     import configparser
     config = configparser.ConfigParser() 
     config.read(r"..\..\..\MatrixHost.ini")
-    HOST = config.get("Pixelserver","host")
+    HOST = config.get("Pixelserver","Host")
+    UDP_HOST = config.get("WLED Server","Host")
 
+    #Matrix = UdpPixelMatrix(UDP_HOST)
     Matrix = PixelMatrix(HOST)
     Matrix.White()
     #Matrix.Send()
