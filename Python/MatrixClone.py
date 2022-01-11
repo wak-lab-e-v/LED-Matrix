@@ -5,13 +5,28 @@ from PIL import Image, ImageDraw, ImageTk
 import codecs
 import configparser
 from pathlib import Path
+import os
+from sys import platform
 
+configpath = r"../../MatrixHost.ini"
+#if platform == "linux" or platform == "linux2":
+    # linux
+#    config.read(r"../../MatrixHost.ini")
+#elif platform == "darwin":
+    # OS X
+if platform == "win32":
+    # Windows...
+    configpath = os.path.normpath(configpath)
+
+print(configpath)
+    
 path = Path(__file__).parent
 config = configparser.ConfigParser() 
-#config.read(r"..\..\MatrixHost.ini")
-config.read("{}/MatrixHost.ini".format(path))
+config.read(configpath)
+#config.read("{}/MatrixHost.ini".format(path))
 HOST = config.get("Pixelserver","host")
 PORT = 1337
+print(HOST,PORT)
 width = 60
 height = 33
 multiply = 8
@@ -78,8 +93,8 @@ def getPicture():
         #Text = Answer.decode()
         #bytesObj = codecs.decode(Text, 'hex_codec')
         bytesObj = Answer[:-2]
-        print(bytesObj)
-        print(len(bytesObj))
+        #print(bytesObj)
+        #print(len(bytesObj))
     except:
         #bytesObj = codecs.decode('00', 'hex_codec')
         #print(len(Test), Text)

@@ -19,8 +19,8 @@ Lila  = (200,100,200)
 # der Klasse PixelMatrix() aus der PixelMatrix Bibliothek
 # Dies übernimmt für uns alles, was wir zum Pixeln brauchen.
 # Wir müssen uns nun nur noch um das setzen der Pixel kümmern
-Matrix = PixelMatrix.UdpPixelMatrix() #UDP_HOST
-#Matrix = PixelMatrix.PixelMatrix(HOST)
+#Matrix = PixelMatrix.UdpPixelMatrix() #UDP_HOST
+Matrix = PixelMatrix.PixelMatrix(HOST)
 Matrix.Black()
 sleep(1.6)
 x = 30
@@ -29,6 +29,6 @@ for i in range(1,59):
     Matrix.Putpixel(i,y+round(sin(i/9)*15), Gruen)
     Matrix.Putpixel(x+round(cos(i/9)*15),int(i/2), Rot)
     Matrix.Putpixel(x+round(cos(i/9)*15),y+round(sin(i/9)*15), Lila)
-    sleep(0.6)
+    sleep(0.2)
 
 

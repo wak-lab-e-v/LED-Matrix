@@ -127,6 +127,7 @@ class UdpPixelMatrix():
 class PixelMatrix():
     def __init__(self, Pixelserver='127.0.0.1', Port = 1337):
         self.serverAddressPort = (Pixelserver, Port)
+        print('Connected to', Pixelserver, Port) 
         self.lastSend = int(round(time.time() * 1000))
         self.Height = 33
         self.Width  = 60
@@ -142,14 +143,15 @@ class PixelMatrix():
 
     def Putpixel(self,x,y,aColor):
         if (x>0) and (y>0) and (x <= self.Width) and (y <= self.Height):
-            cmd = "PX %d %d #%s%s%s\n" % (x,y,format(aColor[0], '02x') ,format(aColor[1], '02x') ,format(aColor[2], '02x'))
+            #cmd = "PX %d %d #%s%s%s\n" % (x,y,format(aColor[0], '02x') ,format(aColor[1], '02x') ,format(aColor[2], '02x'))
+            cmd=f"PX {x} {y} {aColor[0]} {aColor[1]} {aColor[2]}\n"
+            #print(cmd)
             self.ClientSocket.send(cmd.encode())
 
     def Black(self):
         for i in range (1, self.Width+1 ):
             for j in range(1,self.Height+1):
-                #print(i,j)
-                self.Putpixel(i,j,[0,0,0])
+                self.Putpixel(i,j,(0,0,0))
     def White(self):
         for i in range (1, self.Width+1 ):
             for j in range(1,self.Height+1):

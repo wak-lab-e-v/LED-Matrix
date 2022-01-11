@@ -18,8 +18,8 @@ Mode =  5;
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.179.35", 21324)
-serverAddressPort   = ('127.0.0.1', 21324)
-
+#serverAddressPort   = ('127.0.0.1', 21324)
+serverAddressPort   = ("10.10.22.57", 21324)
 
 ##Value     Description     Max. LEDs
 ##1     WARLS   255

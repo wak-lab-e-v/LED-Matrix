@@ -363,6 +363,48 @@ void doASCIImap(uint8_t *buffer, const size_t size, uint32_t width, uint32_t hei
   } 
 }
 
+
+void doBinary(uint8_t *buffer, const size_t size, uint32_t width, uint32_t height)
+{
+  uint16_t matrixsize = width*height;
+  uint8_t brigness_r,brigness_g,brigness_b;
+  uint16_t i = 0,j, index, Pixelnr, Lineend= 0;
+  if (3*matrixsize < size)
+  for (i=0;i<matrixsize;i++)
+  {
+    j = 3*i;
+    brigness_r = gamma8(buffer[j]);
+    brigness_g = gamma8(buffer[j+1]);
+    brigness_b = gamma8(buffer[j+2]);
+    Pixelnr = i;
+    if ((int(Pixelnr / width) & 1)) // ungerade
+    {
+      if (Lineend == 0)
+      {
+        Lineend = Pixelnr+width;
+      }
+      Lineend--;  
+      index = Lineend * 24;  
+    }
+    else
+    {
+      index = 24*Pixelnr;
+      Lineend = 0;
+    }
+    
+    if (brigness_g > 60) brigness_g = 60;
+    if (brigness_r > 60) brigness_r = 60;
+    if (brigness_b > 60) brigness_b = 60;
+    
+    if (index <= (BUFFER_SIZE-24))
+    {
+      SPI_Output_octet(brigness_g,led_stream_buf+(index));
+      SPI_Output_octet(brigness_r,led_stream_buf+(index+8));
+      SPI_Output_octet(brigness_b,led_stream_buf+(index+16));
+    }
+  } 
+}
+
 void doBitmap(uint8_t *buffer, const size_t size, uint32_t width, uint32_t height, uint16_t offset = 0x36)
 {
   uint16_t matrixsize = width*height;
@@ -573,7 +615,7 @@ void loop(){
         //if (bitmappointer == MATRIX_WIDTH*MATRIX_HEIGHT*6+2)
         //  doASCIImap(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
         if ((bitmappointer >= MATRIX_WIDTH*MATRIX_HEIGHT*3) && (bitmappointer < MATRIX_WIDTH*MATRIX_HEIGHT*3+6))
-          doBitmap(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT, 0);
+          doBinary(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
         Connected = client.connected();
         if (Connected)
         {
