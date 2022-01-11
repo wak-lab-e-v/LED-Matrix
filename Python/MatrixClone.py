@@ -19,11 +19,11 @@ if platform == "win32":
     configpath = os.path.normpath(configpath)
 
 print(configpath)
-    
+
 path = Path(__file__).parent
 config = configparser.ConfigParser() 
-config.read(configpath)
-#config.read("{}/MatrixHost.ini".format(path))
+#config.read(configpath)
+config.read("{}/MatrixHost.ini".format(path))
 HOST = config.get("Pixelserver","host")
 PORT = 1337
 print(HOST,PORT)

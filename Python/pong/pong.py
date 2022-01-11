@@ -74,7 +74,7 @@ def array_init():
             #print(x1, y1)
             if (x1 <= Display_Width) and (y1 <= Display_Height):
                 #cmd = ("PX %d %d %d %d %d\n" % (x,y,r,g,b))
-                cmd = cmd+ "PX {x_val} {y_val} #000000\n".format(x_val = x1,y_val = y1)
+                cmd = cmd+ f"PX {x1} {y1} 0 0 0\n"
                 #print(cmd)
     socket_array[0].send(cmd.encode())
 
@@ -98,11 +98,12 @@ def send():
         #print(cmd)
         i+=1
     try:
-        print(cmd)
+        print(cmd,len(cmd))
         socket_array[0].send(cmd.encode())
-        text = socket_array[0].recv(1024).decode()
-        print(text)
-        time.sleep(100000)
+        time.sleep(1)
+        #text = socket_array[0].recv(1024).decode()
+        #print(text)
+        #time.sleep(100000)
     except:
         #reconnect to the socket
         socket_array[0].close()
