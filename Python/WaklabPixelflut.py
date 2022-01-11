@@ -1,11 +1,7 @@
 import socket
 import numpy as np
-import PIL
-from PIL import Image, ImageOps
+from PIL import Image
 import random
-import math
-import pytesseract
-import urllib.request,io
 import time
 import configparser
  
@@ -14,7 +10,6 @@ import requests.packages.urllib3.util.connection as urllib3_cn
 def allowed_gai_family(): return socket.AF_INET
 urllib3_cn.allowed_gai_family = allowed_gai_family
 
-from itertools import chain
 #https://wiki.maglab.space/wiki/PixelCompetition
 #https://www.youtube.com/user/jschlingensiepen/live
 #https://wiki.maglab.space/wiki/PixelCompetition/Csharp
@@ -102,7 +97,6 @@ def pushimage(x,y,img):
     maxsize = (width, height)
     img = img.resize(maxsize);
     arr = np.array(img)
-    cmd = ""
     for i in range (0, img.size[0]):
         for j in range(0,img.size[1]):
             x1 = i + x
@@ -120,7 +114,6 @@ def pushimagerandom(x,y,img):
     img = img.resize(maxsize);
     arr = np.array(img)
     checkArr = np.zeros((img.size[0],img.size[1]))
-    cmd = ""
     countdown = img.size[0]*img.size[1]
     n = 0
     while True:
@@ -167,39 +160,7 @@ def pushgif(x,y,giffile):
                     arr1[i][j][3] = 0
         imo = Image.fromarray(arr1)    
         pushimage(x,y,imo)
-        arr0 = np.array(im)
-                
-def pushpicturesnake(x,y,imgfile):
-    img = Image.open(imgfile)    
-    img = img.convert('RGBA')
-    arr = np.array(img)
-    cmd = ("ST %d %d\n" % (x,y))
-    print(cmd)
-    sock.send(cmd.encode())
-    cmd = ""
-    i = int(img.size[0]/2)
-    j = int(img.size[1]/2)
-    
-        
-def zufall(x,y,n):
-    x1 = 0
-    y1 = 0
-    for i in range(0,n):
-        x2=int(random.random()*x)
-        y2=int(random.random()*y)
-        line(x1,y1, x2, y2)
-        x1 = x2;
-        y1 = y2;
-        
-def zufall2(x,y,n):
-    x1 = 0
-    y1 = 0
-    for i in range(0,n):
-        x2=int(random.random()*x)
-        y2=int(random.random()*y)
-        linepic(x1+offset_x,y1+offset_y, x2+offset_x, y2+offset_y,'w2.png')  
-        x1 = x2;
-        y1 = y2;        
+        arr0 = np.array(im)       
 
 def CLR():
     for i in range(33):
