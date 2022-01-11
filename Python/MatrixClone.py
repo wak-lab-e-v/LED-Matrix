@@ -8,7 +8,7 @@ from pathlib import Path
 import os
 from sys import platform
 
-configpath = r"../../MatrixHost.ini"
+configpath = r"MatrixHost.ini"
 #if platform == "linux" or platform == "linux2":
     # linux
 #    config.read(r"../../MatrixHost.ini")
@@ -22,8 +22,8 @@ print(configpath)
 
 path = Path(__file__).parent
 config = configparser.ConfigParser() 
-#config.read(configpath)
-config.read("{}/MatrixHost.ini".format(path))
+config.read(configpath)
+#config.read("{}/MatrixHost.ini".format(path))
 HOST = config.get("Pixelserver","host")
 PORT = 1337
 print(HOST,PORT)
@@ -48,7 +48,7 @@ class Window(tk.Frame):
         self.render =ImageTk.PhotoImage(getPicture())
         self.img.configure(image=self.render)
         self.img.image=self.render
-        self.after(1000, self.change_img)
+        self.after(500, self.change_img)
 
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
