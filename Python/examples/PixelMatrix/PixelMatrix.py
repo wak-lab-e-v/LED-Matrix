@@ -1,6 +1,7 @@
 import socket
 import time
 import numpy as np
+from PIL import Image
 from threading import Thread, Event
 
 
@@ -25,12 +26,75 @@ from threading import Thread, Event
 # 5 + n*3   Green Value
 # 6 + n*3   Blue Value
 
+DefaultWidth  = 60
+DefaultHeight = 33
+
+class MxImage():
+    def __init__(self, aImage):
+        if isinstance(aImage, str):
+            img = self.LoadImage(aImage)
+        else:
+            if isinstance(aImage, numpy.ndarray):
+                img = Image.fromarray(aImage)
+                img = img.convert('RGBA')
+            else:
+                img = aImage # PIL.Image.Image
+        self.Sprite = np.array(img)
+        self.Height = DefaultHeight
+        self.Width  = DefaultWidth
+        self.Background = np.ones(shape=(self.Width,self.Height,4))
+        self.Foreground = np.zeros(shape=(self.Width,self.Height,4))       
+        #arr1 = np.array(im)
+
+    def LoadImage(self, imgfile):
+        img = Image.open(imgfile)
+        return img.convert('RGBA')
+
+    def Position(x,y):
+        dim = np.shape(self.Sprite)
+        for i in range (0, dim[0]):
+            for j in range(0,dim[1]):
+                x1 = i + x
+                y1 = j + y
+                if  arr[j][i][3]  > 0 :
+                    drawpixel(x1,y1, arr[j][i][0] , arr[j][i][1], arr[j][i][2])        
+        
+
+
+##        for j in range (0, imageObject.size[0]):
+##            for i in range(0,imageObject.size[1]):
+##                if (arr0[i][j][0] == arr1[i][j][0]) and (arr0[i][j][1] == arr1[i][j][1]) and (arr0[i][j][2] == arr1[i][j][2]):
+##                    arr1[i][j][3] = 0
+##        imo = Image.fromarray(arr1)
+##
+##
+##        def pushpicture(x,y,imgfile):
+##    img = Image.open(imgfile)    
+##    img = img.convert('RGBA')
+##    pushimage(x,y,img)
+##    
+##def pushimage(x,y,img):
+##    maxsize = (width, height)
+##    if (img.size[0] > width) or (img.size[1] > height):
+##        img = img.resize(maxsize);
+##    arr = np.array(img)
+##    cmd = ""
+##    for i in range (0, img.size[0]):
+##        for j in range(0,img.size[1]):
+##            x1 = i + x
+##            y1 = j + y
+##            if  arr[j][i][3]  > 0 :
+##                drawpixel(x1,y1, arr[j][i][0] , arr[j][i][1], arr[j][i][2])
+##
+
+                
+
 class UdpPixelMatrix():
     def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True):
         self.serverAddressPort = (UDPserver, Port)
         self.lastSend = int(round(time.time() * 1000))
-        self.Height = 33
-        self.Width  = 60
+        self.Height = DefaultHeight
+        self.Width  = DefaultWidth
         self.OutputArray = np.zeros((self.Height*self.Width,3),dtype=np.uint8)
         self.Mode =  Mode;
         self.MaxLight = 0x3f
@@ -129,8 +193,8 @@ class PixelMatrix():
         self.serverAddressPort = (Pixelserver, Port)
         print('Connected to', Pixelserver, Port) 
         self.lastSend = int(round(time.time() * 1000))
-        self.Height = 33
-        self.Width  = 60
+        self.Height = DefaultHeight
+        self.Width  = DefaultWidth
 
         self.ClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.ClientSocket.settimeout(0.1)
@@ -143,8 +207,8 @@ class PixelMatrix():
 
     def Putpixel(self,x,y,aColor):
         if (x>0) and (y>0) and (x <= self.Width) and (y <= self.Height):
-            #cmd = "PX %d %d #%s%s%s\n" % (x,y,format(aColor[0], '02x') ,format(aColor[1], '02x') ,format(aColor[2], '02x'))
-            cmd=f"PX {x} {y} {aColor[0]} {aColor[1]} {aColor[2]}\n"
+            cmd = "PX %d %d #%s%s%s\n" % (x,y,format(aColor[0], '02x') ,format(aColor[1], '02x') ,format(aColor[2], '02x'))
+            #cmd=f"PX {x} {y} {aColor[0]} {aColor[1]} {aColor[2]}\n"
             #print(cmd)
             self.ClientSocket.send(cmd.encode())
 
@@ -160,6 +224,9 @@ class PixelMatrix():
 
 if __name__ == "__main__":
     Matrix = UdpPixelMatrix()
+
+    xImage = MxImage('pac.png')
+    
     Matrix.White()
     #Matrix.Send()
     time.sleep(1)
