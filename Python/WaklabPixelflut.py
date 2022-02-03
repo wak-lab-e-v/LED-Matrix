@@ -18,19 +18,20 @@ config = configparser.ConfigParser()
 config.read(r"MatrixHost.ini")
 
 HOST = config['Pixelserver']['Host']
+print(HOST)
 
 PORT = 1337
 width = 60
 height = 33
+gain = 0.6
 
 offset_x = 1
 offset_y = 1
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-sock.settimeout(0.1)
+sock.settimeout(0.5)
 sock.connect((HOST, PORT))
-
 
 
 def getPicture():
@@ -102,7 +103,7 @@ def pushimage(x,y,img):
             x1 = i + x
             y1 = j + y
             if  arr[j][i][3]  > 0 :
-                drawpixel(x1,y1, arr[j][i][0] , arr[j][i][1], arr[j][i][2])
+                drawpixel(x1,y1,int(arr[j][i][0]*gain),int(arr[j][i][1]*gain),int(arr[j][i][2]*gain))
 
 def pushpicturerandom(x,y,imgfile):
     img = Image.open(imgfile)    
