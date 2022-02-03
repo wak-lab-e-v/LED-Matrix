@@ -210,7 +210,10 @@ class PixelMatrix():
             cmd = "PX %d %d #%s%s%s\n" % (x,y,format(aColor[0], '02x') ,format(aColor[1], '02x') ,format(aColor[2], '02x'))
             #cmd=f"PX {x} {y} {aColor[0]} {aColor[1]} {aColor[2]}\n"
             #print(cmd)
+            #cmd = "PX 20 20 #FFFFFF\n"
+            #cmd = 'HELP\n'
             self.ClientSocket.send(cmd.encode())
+            #print(self.ClientSocket.recv(180).decode())
 
     def Black(self):
         for i in range (1, self.Width+1 ):
