@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>Pixelflut</title>
+</head>
+
+<body></body>
+    <img src="/static/images/w.png" alt="WakLab-Logo">
+    <h1>Ahoi!</h1>
+    <h2>Was möchtest Du uns mitteilen?</h2>
+    <p>{{ entry }}</p>
+    <form method="POST">
+        <input name="text" required>
+        <input type="submit">
+    </form>
+
+    <h2>Letzte Einträge:</h2>
+
+    {% for value in last_entries %}
+    <p>{{value}}</p>
+    {% endfor %}
+</body>
+
+</html>
