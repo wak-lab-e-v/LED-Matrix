@@ -12,7 +12,7 @@ offset_y = 1
 
 class Matrix():
 
-    def __init__(self,width,height):
+    def __init__(self,width:int, height:int):
         self.width = width
         self.height = height
         configpath = Path(__file__).parent.parent/"MatrixHost.ini"
@@ -38,7 +38,7 @@ class Matrix():
         self.socket.settimeout(1)
         self.socket.connect((self.HOST, self.PORT))
     
-    def create_message_matrix(self,message_string,color):
+    def create_message_matrix(self,message_string:str,color):
         font = ImageFont.truetype('arialbd.ttf', 12) #load the font
         size = font.getsize(message_string)  #calc the size of text in pixels
         image = Image.new('1', size, 1)  #create a b/w image
@@ -98,5 +98,24 @@ class Matrix():
                 #sock_error = True
                 return False
 
-    def send_message(self, message,requested_color):
+    def send_message(self, message:str,requested_color):
         self.create_message_matrix(message,requested_color)
+
+    def send_pong(self,command):
+        try:
+            #print(cmd,len(cmd))
+            self.socket.send(command.encode())
+            return True
+        except:
+            #reconnect to the socket
+            self.socket.close()
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.settimeout(1)
+            try:
+                self.socket.connect((self.HOST, self.PORT))
+                self.socket.send(command.encode())
+                return True
+            except:
+                print("socket error")
+                #sock_error = True
+                return False
