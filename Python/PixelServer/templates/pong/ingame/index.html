@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>{{side}} Seite</title>
+    </head>
+    
+    <body>
+        <p>Willkommen auf der {{side}}n Seite!</p>
+        <form method="POST" id="up">
+            <input hidden name="command" value="0">
+            <input hidden name="side" value={{side}}>
+        </form>
+        <form method="POST" id="down">
+            <input hidden name="command" value="1">
+            <input hidden name="side" value={{side}}>
+        </form>
+        <button type="submit" form="up">&#8593;</button>
+        <button type="submit" form="down">&#8595;</button>
+    </body>
+</html>

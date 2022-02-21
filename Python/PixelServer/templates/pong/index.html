@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>Pong</title>
+    </head>
+    
+    <body>
+        <p>Hier wird fleißig an Pong gearbeitet!</p>
+        <form method="POST" id="hell">
+            <input hidden name="command" value="0">
+            <input hidden name="side" value="hell">
+        </form>
+        <form method="POST" id="dunkel" action="/templates/pong/ingame">
+            <input hidden name="command" value="1">
+            <input hidden name="side" value="dunkel">
+        </form>
+        <button type="submit" form="hell">helle Seite</button>
+        <button type="submit" form="dunkel">dunkle Seite</button>
+    </body>
+</html>
