@@ -5,15 +5,19 @@
     
     <body>
         <p>Hier wird fleißig an Pong gearbeitet!</p>
-        <form method="POST" id="hell">
+        <form method="POST" id="hell" action="/pong/ingame">
             <input hidden name="command" value="0">
-            <input hidden name="side" value="hell">
+            <input hidden name="side" value="helle">
         </form>
-        <form method="POST" id="dunkel" action="/templates/pong/ingame">
+        <form method="POST" id="dunkel" action="/pong/ingame">
             <input hidden name="command" value="1">
-            <input hidden name="side" value="dunkel">
+            <input hidden name="side" value="dunkle">
         </form>
         <button type="submit" form="hell">helle Seite</button>
         <button type="submit" form="dunkel">dunkle Seite</button>
+
+        <form>
+            <button type="submit" formaction="/../">Zurück</button>
+        </form>
     </body>
 </html>

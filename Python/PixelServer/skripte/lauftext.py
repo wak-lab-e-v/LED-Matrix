@@ -4,13 +4,11 @@ import matrix_handler
 
 class Lauftext():
     app = None
-    def __init__(self):
+    def __init__(self,matrix):
         self.entries = []
         self.history_length = 5
 
-        Display_Height = 33
-        Display_Width  = 60
-        self.pixelflut = matrix_handler.Matrix(width=Display_Width,height=Display_Height)
+        self.pixelflut = matrix
     
         self.standard_colors = { "red":[255,0,0],
                             "green":[0,255,0],
