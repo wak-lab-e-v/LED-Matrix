@@ -50,13 +50,20 @@ Byte 5 + n*2 	Color16 Low
 * Configure the ESP32 as client in your local Network
 * Look for the IP Adress in the serial monitor (115200 Baud) 
 
-## Python
+## Python UDP
+Python Scripts for UDP communication between PC -> ESP32 
 ### Play Gif, jpg, png, mp4
 selet a Directory to play ones by ones
-
 call PlayDir('./')
 
 ### Duplicate Desktop
 You need *pyautogui* for screenshot Desktop
-
 call Desktop()
+
+### Matrix UDP desktop simulation 
+
+## Python Pixelserver
+Python scripts for our matrixserver
+### Matrix desktop simulation
+
+
