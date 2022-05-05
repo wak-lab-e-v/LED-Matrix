@@ -187,6 +187,12 @@ class UdpPixelMatrix():
             for j in range(1,self.Height+1):
                 #print(i,j)
                 self.Putpixel(i,j,[255,255,255])
+    def NdArray(self, aArray : np.ndarray):
+        for i in range (1, self.Width+1 ):
+            for j in range(1,self.Height+1):
+                #print(i,j)
+                self.Putpixel(i,j,aArray[i-1][j-1])
+    
 
 class PixelMatrix():
     def __init__(self, Pixelserver='127.0.0.1', Port = 1337):
@@ -224,6 +230,12 @@ class PixelMatrix():
             for j in range(1,self.Height+1):
                 #print(i,j)
                 self.Putpixel(i,j,[255,255,255])
+    
+    def NdArray(self, aArray : np.ndarray):
+        for i in range (1, self.Width+1 ):
+            for j in range(1,self.Height+1):
+                #print(i,j)
+                self.Putpixel(i,j,aArray[i-1][j-1])
 
 if __name__ == "__main__":
     Matrix = UdpPixelMatrix()
@@ -231,21 +243,21 @@ if __name__ == "__main__":
     xImage = MxImage('pac.png')
     
     Matrix.White()
-    #Matrix.Send()
-    time.sleep(1)
-    Matrix.Black()
-    #Matrix.Send()
-
-    import configparser
-    config = configparser.ConfigParser() 
-    config.read(r"..\..\..\MatrixHost.ini")
-    HOST = config.get("Pixelserver","Host")
-    UDP_HOST = config.get("WLED Server","Host")
-
-    #Matrix = UdpPixelMatrix(UDP_HOST)
-    Matrix = PixelMatrix(HOST)
-    Matrix.White()
-    #Matrix.Send()
-    time.sleep(1)
-    Matrix.Black()
-    #Matrix.Send()
+##    #Matrix.Send()
+##    time.sleep(1)
+##    Matrix.Black()
+##    #Matrix.Send()
+##
+##    import configparser
+##    config = configparser.ConfigParser() 
+##    config.read(r"..\..\..\MatrixHost.ini")
+##    HOST = config.get("Pixelserver","Host")
+##    UDP_HOST = config.get("WLED Server","Host")
+##
+##    Matrix = UdpPixelMatrix(UDP_HOST)
+##    #Matrix = PixelMatrix(HOST)
+##    Matrix.White()
+##    #Matrix.Send()
+##    time.sleep(1)
+##    Matrix.Black()
+##    #Matrix.Send()

@@ -65,7 +65,7 @@ class Window(tk.Frame):
                 x = i + 1
                 self.DrawLed(img, x,y, multiply, (color[0]*3, color[1]*3, color[2]*3))
         global count
-        img.save('img_'+str(count).zfill(5)+'.png')
+        #img.save('img_'+str(count).zfill(5)+'.png')
         count = count + 1
         return img
 
