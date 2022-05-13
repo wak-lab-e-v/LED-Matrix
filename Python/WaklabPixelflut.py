@@ -176,6 +176,6 @@ if __name__ == '__main__':
     #drawpixel(1,33, 100, 100, 0)
     #getPicture()
     CLR()
-    pushpicturerandom(0, 0, 'w.png')
+    pushpicturerandom(0, 0, 'Linux_Pingu_640.jpg')
 
     
