@@ -56,6 +56,10 @@ Python Scripts for UDP communication between PC -> ESP32
 selet a Directory to play ones by ones
 call PlayDir('./')
 
+Requirements:
+* pip3 install Pillow
+* pip3 install opencv-python
+
 ### Duplicate Desktop
 You need *pyautogui* for screenshot Desktop
 call Desktop()
