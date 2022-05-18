@@ -1,4 +1,16 @@
 # LED-Matrix
+repro for some scripts, tools and stuff around our LED-Matrix
+
+## ESP32
+Server/Client for ESP32
+
+
+## media
+some media files
+
+
+
+
 Drive WS2812 with ESP32, DMA and UDP
 
 
