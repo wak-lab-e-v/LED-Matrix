@@ -240,7 +240,7 @@ class PixelMatrix():
 if __name__ == "__main__":
     Matrix = UdpPixelMatrix()
 
-    xImage = MxImage('pac.png')
+    xImage = MxImage('Fox-Face2.png')
     
     Matrix.White()
 ##    #Matrix.Send()
