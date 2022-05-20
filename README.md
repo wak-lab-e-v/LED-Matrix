@@ -21,9 +21,6 @@ Python Scripts for UDP communication between PC -> ESP32
 selet a Directory to play ones by ones
 call PlayDir('./')
 
-Requirements:
-* pip3 install Pillow
-* pip3 install opencv-python
 
 ### Duplicate Desktop
 You need *pyautogui* for screenshot Desktop
@@ -36,3 +33,11 @@ Some Python scripts to simulate the LED Matrix on your system.
 Python scripts for our matrixserver
 
 
+## Installation
+
+'''
+pip3 install -r requirements.txt
+'''
+
+Edit the file 'MatrixHost.ini' with your gopixelflut Server ip address, or the ESP32 matrix udp server ip.
+ 
