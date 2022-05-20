@@ -35,9 +35,8 @@ Python scripts for our matrixserver
 
 ## Installation
 
-'''
+```
 pip3 install -r requirements.txt
-'''
+```
 
-Edit the file 'MatrixHost.ini' with your gopixelflut Server ip address, or the ESP32 matrix udp server ip.
- 
+Edit the file `MatrixHost.ini` with your [gopixelflut](https://github.com/wak-lab-e-v/gopixelflut) Server ip address, or the [ESP32](ESP32/) matrix udp server ip.
