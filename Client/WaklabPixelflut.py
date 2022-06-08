@@ -1,9 +1,12 @@
 import socket
 import numpy as np
-from PIL import Image
+from PIL import Image as PilImage
 import random
 import time
 import configparser
+
+from tkinter import *
+from tkinter import filedialog
  
 # monkeypatch: make requests only use ipv4
 import requests.packages.urllib3.util.connection as urllib3_cn
@@ -13,6 +16,8 @@ urllib3_cn.allowed_gai_family = allowed_gai_family
 #https://wiki.maglab.space/wiki/PixelCompetition
 #https://www.youtube.com/user/jschlingensiepen/live
 #https://wiki.maglab.space/wiki/PixelCompetition/Csharp
+
+
 
 config = configparser.ConfigParser() 
 config.read(r"MatrixHost.ini")
@@ -90,7 +95,7 @@ def square(x1,y1, x2, y2):
     line(x2,y1,x1,y1)
 
 def pushpicture(x,y,imgfile):
-    img = Image.open(imgfile)    
+    img = PilImage.open(imgfile)    
     img = img.convert('RGBA')
     pushimage(x,y,img)
     
@@ -106,7 +111,7 @@ def pushimage(x,y,img):
                 drawpixel(x1,y1,int(arr[j][i][0]*gain),int(arr[j][i][1]*gain),int(arr[j][i][2]*gain))
 
 def pushpicturerandom(x,y,imgfile):
-    img = Image.open(imgfile)    
+    img = PilImage.open(imgfile)    
     img = img.convert('RGBA')
     pushimage(x,y,img)
     
@@ -137,7 +142,7 @@ def pushimagerandom(x,y,img):
 
                 
 def pushgif(x,y,giffile):
-    imageObject = Image.open(giffile)
+    imageObject = PilImage.open(giffile)
     print(imageObject.is_animated)
     print(imageObject.n_frames)
     imageObject.seek(0)
@@ -159,7 +164,7 @@ def pushgif(x,y,giffile):
             for i in range(0,imageObject.size[1]):
                 if (arr0[i][j][0] == arr1[i][j][0]) and (arr0[i][j][1] == arr1[i][j][1]) and (arr0[i][j][2] == arr1[i][j][2]):
                     arr1[i][j][3] = 0
-        imo = Image.fromarray(arr1)    
+        imo = PilImage.fromarray(arr1)    
         pushimage(x,y,imo)
         arr0 = np.array(im)       
 
@@ -172,11 +177,18 @@ def CLR():
 
 
 if __name__ == '__main__':
+    fenster = Tk()
+    fenster.filename = ""
+    fenster.filename = filedialog.askopenfilename(initialdir = "./", title = "Picture", filetypes =(("all files","*"),("Bitmap files","*.bmp")))
+    print('Input:  ',fenster.filename)
+    vPath = fenster.filename
+    fenster.destroy()
+
     delay = 0.03
     #drawpixel(1,33, 100, 100, 0)
     #getPicture()
     CLR()
     #pushpicturerandom(0, 0, 'Linux_Pingu_640.jpg')
-    pushpicturerandom(0, 0, 'Fox-Face2.png')
+    pushpicturerandom(0, 0, vPath)
 
     
