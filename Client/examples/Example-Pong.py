@@ -3,11 +3,12 @@ from math import sin, cos, pi, trunc
 from time import sleep
 import numpy as np
 from pathlib import Path
-
+import keyboard
 import configparser
 
 config = configparser.ConfigParser() 
-configpath = Path(__file__).parent.parent/"MatrixHost.ini" 
+configpath = Path(__file__).parent.parent/"MatrixHost.ini"
+print(configpath)
 config.read(configpath)
 HOST = config.get("Pixelserver","Host")
 UDP_HOST = config.get("WLED Server","Host")
@@ -250,7 +251,7 @@ def Flieg(aArray : np.ndarray ,Von, Speed, Winkel):
 # der Klasse PixelMatrix() aus der PixelMatrix Bibliothek
 # Dies übernimmt für uns alles, was wir zum Pixeln brauchen.
 # Wir müssen uns nun nur noch um das setzen der Pixel kümmern
-Matrix = PixelMatrix.UdpPixelMatrix() #UDP_HOST
+Matrix = PixelMatrix.UdpPixelMatrix(UDP_HOST)
 #Matrix = PixelMatrix.PixelMatrix(HOST)
 
 Background = np.zeros(shape=(Matrix.Width,Matrix.Height,3), dtype=np.uint8)
@@ -285,11 +286,26 @@ class PaddelData():
 paddel = PaddelData()
 position_class = Position()
 
-for i in range(1,1000):
+#for i in range(1,1000):
+while 1:
     Spielfeld = np.copy(Background)
     scoreDisplay(score, Spielfeld)
     Paddel(Spielfeld,0,paddel.left)
     Paddel(Spielfeld,Matrix.Width-2,paddel.right)
+    if keyboard.is_pressed("p"):
+        if paddel.right > 0:
+            paddel.right -= 1
+    if keyboard.is_pressed("l"):
+        if paddel.right < Matrix.Height-5:
+            paddel.right += 1
+
+    if keyboard.is_pressed("q"):
+        if paddel.left > 0:
+            paddel.left -= 1
+    if keyboard.is_pressed("a"):
+        if paddel.left < Matrix.Height-5:
+            paddel.left += 1
+    
     Ball(Spielfeld,trunc(position_class.position[0]),trunc(position_class.position[1]))
     position_class.position, position_class.angle, scored = Flieg(Spielfeld, position_class.position, 1, position_class.angle)
     if scored[0]:

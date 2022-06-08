@@ -11,16 +11,15 @@ Display_Width  = 60
 
 Mode =  5
 
-
-gain = 1.7
+gain = 1.2
 
 #serverAddressPort   = ("192.168.188.114", 21324)
 #serverAddressPort   = ("192.168.188.115", 21324)
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.179.35", 21324)
-#serverAddressPort   = ('127.0.0.1', 21324)
 serverAddressPort   = ("10.10.22.57", 21324)
+#serverAddressPort   = ("192.168.1.226", 21324) # WAKLAB OPenWRT
 #serverAddressPort   = ("127.0.0.1", 21324)
 
 
@@ -120,11 +119,30 @@ def Black():
 def Desktop():
     import pyautogui
     frame = pyautogui.screenshot()
-    maxsize = (Display_Width, Display_Height) 
+    maxsize = (Display_Width, Display_Height)
     # Crop
     #frame = frame[30:250, 100:230]
     #frame = frame.crop((350, 300, 1550, 700))
-    im = cv2.resize(np.array(frame),maxsize,interpolation=cv2.INTER_LINEAR)#INTER_AREA)
+    im = cv2.resize(np.array(frame),maxsize,interpolation=cv2.INTER_LANCZOS4  ) #INTER_AREA)
+
+
+##    frm = np.array(frame)
+##    x_step = frame.size[0] / Display_Width
+##    y_step = frame.size[1] / Display_Height
+##    
+##    im = np.zeros(shape=(Display_Height, Display_Width,3))  
+##    for i in range (0, frame.size[0]):
+##        for j in range(0, frame.size[1]):
+##            x = int(i/x_step)
+##            y = int(j/y_step)
+##            if np.sum(im[y,x]) < np.sum(frm[j,i]):
+##                im[y,x] = frm[j,i]
+            
+            
+            
+    #sp = np.array_split(im, 10, axis=0)
+    #print(sp, len(sp), len(sp[0]), sp[0][0].shape)
+    
     #im = cv2.cvtColor(np.array(frame), cv2.COLOR_BGR2RGB)
     for i in range (0, im.shape[1]):
         for j in range(0,im.shape[0]):
@@ -221,7 +239,7 @@ def PlayDir(aPath):
             if (Ext in ['.gif']):
                 AnimateGif(Datei)
             Black()
-                
+
 
 def Webcam():
     # get the webcam:
@@ -267,10 +285,10 @@ def Webcam():
 if __name__ == "__main__":
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) #SOCK_DGRAM) #SOCK_STREAM)
     Black()
-    #Webcam()
-    while True:
+    Webcam()
+    #while True:
         #AnimateGif("Katze.gif")
         #AnimateMp4("2021-08-08 02-03-54.mkv")
         #ShowPicture("Katze.png")
-        #Desktop()
-        PlayDir('./')
+        
+        #PlayDir('./')

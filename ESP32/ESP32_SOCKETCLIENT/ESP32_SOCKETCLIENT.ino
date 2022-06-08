@@ -196,7 +196,7 @@ int ScanNetwork()
       Serial.print(": ");
       Serial.print(WiFi.SSID(i));
       for (int j=0;j<Wlans;j++)
-        if (!WiFi.SSID(i).compareTo(WLAN[j].ssid) && (result < 0))
+        if (!WiFi.SSID(i).compareTo(WLAN[j].ssid) && ((j<result) or (result < 0))) // lieber höchse prio auf obersten Router (result < 0))
           result = j;
       Serial.print(" (");
       Serial.print(WiFi.RSSI(i));

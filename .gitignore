@@ -1,7 +1,7 @@
 # Credentials
 Client/MatrixHost.ini
 MatrixHost.ini
-Client/ssid.h
+ESP32/ssid.h
 ssid.h
 
 # Prerequisites
