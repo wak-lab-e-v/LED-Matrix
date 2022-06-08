@@ -1,7 +1,7 @@
 # Credentials
-Python/MatrixHost.ini
+Client/MatrixHost.ini
 MatrixHost.ini
-Python/ssid.h
+Client/ssid.h
 ssid.h
 
 # Prerequisites
