@@ -172,10 +172,7 @@ def AnimateGif(filename):
     img = Image.open(filename)
     for i in range(5):
         for i,frame in enumerate(ImageSequence.Iterator(img)):
-            frm = frame.convert('RGBA') 
-            enhancer = ImageEnhance.Brightness(frm)
-            im_pil = enhancer.enhance(gain)
-            im = im_pil.copy()
+            im = frame.copy()
             im.thumbnail((Display_Width, Display_Height))
             im = im.convert('RGBA')
             arr = np.array(im)
@@ -194,13 +191,6 @@ def AnimateMp4(filename):
             maxsize = (Display_Width, Display_Height) 
             im = cv2.resize(frame,maxsize,interpolation=cv2.INTER_AREA)
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-
-            hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-            h, s, v = cv2.split(hsv)
-            v += round(10*gain)
-            final_hsv = cv2.merge((h, s, v))
-            im = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
-
             #im    = imRes.convert('RGB')
             #arr = np.array(im)
             #print(im.shape)

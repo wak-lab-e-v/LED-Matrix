@@ -5,6 +5,7 @@ import socket
 import time
 import numpy as np
 import os
+from functools import wraps, lru_cache
 
 Display_Height = 33
 Display_Width  = 60
@@ -12,7 +13,7 @@ Display_Width  = 60
 Mode =  5
 
 
-gain = 1.7
+gain = 3.7
 
 #serverAddressPort   = ("192.168.188.114", 21324)
 #serverAddressPort   = ("192.168.188.115", 21324)
@@ -20,8 +21,8 @@ gain = 1.7
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.179.35", 21324)
 #serverAddressPort   = ('127.0.0.1', 21324)
-serverAddressPort   = ("10.10.22.57", 21324)
-#serverAddressPort   = ("127.0.0.1", 21324)
+#serverAddressPort   = ("10.10.22.57", 21324)
+serverAddressPort   = ("127.0.0.1", 21324)
 
 
 ##Value     Description     Max. LEDs
@@ -50,6 +51,7 @@ GammaTable = np.array([((i / 255.0) ** 2.6) * 32.0+0.5 # gamma 2.6
 
 # Create a UDP socket at client side
 
+@lru_cache(maxsize=None)
 def PixelDecoder(x, y):
     if Display_Width <= Display_Width:
         Zeile  = y  # von oben nach unten wie auch in den Bildern
@@ -92,7 +94,7 @@ def SendUDP(aMode, array):
         #print(len(bytesToSend))
         UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
-
+@lru_cache(maxsize=None)
 def one_word(r,g,b):
     r1 = r if(r < 0x3f) else 0x3f
     g1 = g if(g < 0x3f) else 0x3f
@@ -110,7 +112,7 @@ def Putpixel(x,y,aColor):
     #print(Spalte,Zeile)
     OutputArray[Zeile * Display_Width + Spalte] = color;
     
-
+@lru_cache(maxsize=None)
 def Black():
     for i in range (0, Display_Width ):
         for j in range(0,Display_Height):
@@ -120,7 +122,7 @@ def Black():
 def Desktop():
     import pyautogui
     frame = pyautogui.screenshot()
-    maxsize = (Display_Width, Display_Height) 
+    maxsize = (Display_Width, Display_Height)
     # Crop
     #frame = frame[30:250, 100:230]
     #frame = frame.crop((350, 300, 1550, 700))
@@ -151,7 +153,10 @@ def AnimateGif(filename):
     img = Image.open(filename)
     for i in range(5):
         for i,frame in enumerate(ImageSequence.Iterator(img)):
-            im = frame.copy()
+            frm = frame.convert('RGBA') 
+            enhancer = ImageEnhance.Brightness(frm)
+            im_pil = enhancer.enhance(gain)
+            im = im_pil.copy()
             im.thumbnail((Display_Width, Display_Height))
             im = im.convert('RGBA')
             arr = np.array(im)
@@ -170,6 +175,13 @@ def AnimateMp4(filename):
             maxsize = (Display_Width, Display_Height) 
             im = cv2.resize(frame,maxsize,interpolation=cv2.INTER_AREA)
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+
+            hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
+            h, s, v = cv2.split(hsv)
+            v += round(10*gain)
+            final_hsv = cv2.merge((h, s, v))
+            im = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+
             #im    = imRes.convert('RGB')
             #arr = np.array(im)
             #print(im.shape)
@@ -221,7 +233,7 @@ def PlayDir(aPath):
             if (Ext in ['.gif']):
                 AnimateGif(Datei)
             Black()
-                
+
 
 def Webcam():
     # get the webcam:
