@@ -81,6 +81,7 @@ def accept_incoming_connections():
           stop.set()
         msg2Matrix(client_msg)
 
+
 def Decode4(msg):
     gain = 6
     offset = (msg[2] << 8) + msg[3]
@@ -92,7 +93,8 @@ def Decode4(msg):
             MatrixBuffer[index % width][Zeile] = color
         else:
             MatrixBuffer[(width-1)-(index % width)][Zeile] = color
-    
+
+
 def Decode5(msg):
     offset = (msg[2] << 8) + msg[3]
     #print(len(msg))
@@ -105,7 +107,7 @@ def Decode5(msg):
             MatrixBuffer[index % width][Zeile] = color
         else:
             MatrixBuffer[(width-1)-(index % width)][Zeile] = color
-         
+      
 def msg2Matrix(msg):
     if len(msg) > 4:
         Type = msg[0]

@@ -29,7 +29,7 @@ PORT = 1337
 print(HOST,PORT)
 width = 60
 height = 33
-multiply = 8
+multiply = 10
 offset_x = 1
 offset_y = 1
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

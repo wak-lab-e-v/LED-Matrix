@@ -3,7 +3,7 @@ import time
 import numpy as np
 from PIL import Image
 from threading import Thread, Event
-
+from functools import wraps, lru_cache
 
 #serverAddressPort   = ("192.168.188.114", 21324)
 #serverAddressPort   = ("192.168.188.115", 21324)
@@ -105,7 +105,8 @@ class UdpPixelMatrix():
             self.stop = Event()
             send_thread = Thread(target=self.cyclic_send)
             send_thread.start()
-
+            
+    @lru_cache(maxsize=None)
     def PixelDecoder(self, x, y):
         if (y == 0):
             y = 1
@@ -128,9 +129,12 @@ class UdpPixelMatrix():
                 
     def Send(self):
         offset = 0
-        while int(round(time.time() * 1000)) < self.lastSend + 140:
-            time.sleep(0.04)
-        lastSend = int(round(time.time() * 1000))
+        delay = time.time() - self.lastSend
+        if (delay < 0.140) and (delay > 0):
+            while (time.time() - self.lastSend) < 0.140:
+                time.sleep(0.04)
+        delay = time.time() - self.lastSend
+        self.lastSend = time.time()
         while True:
             if self.Mode == 4:
                 bytesToSend         = b'\x04\x02'
@@ -153,7 +157,8 @@ class UdpPixelMatrix():
                 else:
                     bytesToSend += color[0].tobytes() + color[1].tobytes()
             self.UDPClientSocket.sendto(bytesToSend, self.serverAddressPort)
-
+            
+    @lru_cache(maxsize=None)
     def Color16(self,r,g,b):
         r1 = r if(r < 0x3f) else 0x3f
         g1 = g if(g < 0x3f) else 0x3f

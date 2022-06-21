@@ -5,6 +5,7 @@ import socket
 import time
 import numpy as np
 import os
+from functools import wraps, lru_cache
 
 Display_Height = 33
 Display_Width  = 60
@@ -21,7 +22,7 @@ gain = 2.5
 serverAddressPort   = ("10.10.22.57", 21324)
 serverAddressPort   = ("192.168.1.226", 21324) # WAKLAB OPenWRT
 
-#serverAddressPort   = ("127.0.0.1", 21324)
+serverAddressPort   = ("127.0.0.1", 21324)
 
 
 ##Value     Description     Max. LEDs
@@ -50,6 +51,7 @@ GammaTable = np.array([((i / 255.0) ** 2.6) * 32.0+0.5 # gamma 2.6
 
 # Create a UDP socket at client side
 
+@lru_cache(maxsize=None)
 def PixelDecoder(x, y):
     if Display_Width <= Display_Width:
         Zeile  = y  # von oben nach unten wie auch in den Bildern
@@ -92,7 +94,7 @@ def SendUDP(aMode, array):
         #print(len(bytesToSend))
         UDPClientSocket.sendto(bytesToSend, serverAddressPort)
 
-
+@lru_cache(maxsize=None)
 def one_word(r,g,b):
     r1 = r if(r < 0x3f) else 0x3f
     g1 = g if(g < 0x3f) else 0x3f
@@ -110,7 +112,7 @@ def Putpixel(x,y,aColor):
     #print(Spalte,Zeile)
     OutputArray[Zeile * Display_Width + Spalte] = color;
     
-
+@lru_cache(maxsize=None)
 def Black():
     for i in range (0, Display_Width ):
         for j in range(0,Display_Height):
@@ -240,7 +242,7 @@ def PlayDir(aPath):
             if (Ext in ['.gif']):
                 AnimateGif(Datei)
             Black()
-                
+
 
 def Webcam():
     # get the webcam:

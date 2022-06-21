@@ -21,18 +21,33 @@ Lila  = (200,100,200)
 Matrix = PixelMatrix.PixelMatrix(HOST)
 Matrix.Black()
 
-x = 10
-y = 20
-Matrix.Putpixel(x,y, Weiss)
 
-x = 10
-y = 11
-Matrix.Putpixel(x,y, Rot)
+Matrix.Putpixel(10,10, Weiss)
+Matrix.Putpixel(1,1,Rot)
 
-x = 10
-y = 12
-Matrix.Putpixel(x,y, Gruen)
+for i in range(60):
+    for j in range(32):
+        Matrix.Putpixel(i,j,Rot)
 
-x = 10
-y = 13
-Matrix.Putpixel(x,y, Blau)
+from math import sin, cos
+x = 30
+y = 16
+for i in range(1,59):        
+   Matrix.Putpixel(x+round(cos(i/9)*15),y+round(sin(i/9)*15), Blau)
+
+
+##x = 10
+##y = 20
+##Matrix.Putpixel(x,y, Weiss)
+##
+##x = 10
+##y = 11
+##Matrix.Putpixel(x,y, Rot)
+##
+##x = 10
+##y = 12
+##Matrix.Putpixel(x,y, Gruen)
+##
+##x = 10
+##y = 13
+##Matrix.Putpixel(x,y, Blau)

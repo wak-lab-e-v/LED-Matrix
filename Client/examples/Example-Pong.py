@@ -1,10 +1,11 @@
 import PixelMatrix
 from math import sin, cos, pi, trunc
-from time import sleep
+from time import sleep, time
 import numpy as np
 from pathlib import Path
 import keyboard
 import configparser
+from functools import wraps, lru_cache
 
 config = configparser.ConfigParser() 
 configpath = Path(__file__).parent.parent/"MatrixHost.ini"
@@ -71,6 +72,7 @@ def Paddel(aArray : np.ndarray, x,y):
     for j in range(1,5):
         aArray[x+0][j+y] = Weiss
         aArray[x+1][j+y] = Weiss
+        
 def Ball(aArray : np.ndarray, x:int,y:int):
     #print(x,y)
     aArray[x][y] = Weiss
@@ -79,9 +81,11 @@ def Ball(aArray : np.ndarray, x:int,y:int):
     aArray[x+1][y+1] = Weiss
 
 
+@lru_cache(maxsize=None) 
 def RotateX(x,y,a) ->float:
   return x*cos(a*pi/180)#-y*sin(a*pi/180);
-    
+
+@lru_cache(maxsize=None)     
 def RotateY(x,y,a) -> float:
   return x*sin(a*pi/180)#+y*cos(a*pi/180);
 
@@ -181,6 +185,7 @@ def gameStartScreen(matrix:PixelMatrix.UdpPixelMatrix):
     matrix.NdArray(start_array)
     #TODO: add function to wait for movement of paddle
     sleep(5)
+    
 
 def scoredPoint(score: Score, side:int) -> bool:
     """Fügt einen Punkt zur jeweiligen Seite hinzu
@@ -251,7 +256,7 @@ def Flieg(aArray : np.ndarray ,Von, Speed, Winkel):
 # der Klasse PixelMatrix() aus der PixelMatrix Bibliothek
 # Dies übernimmt für uns alles, was wir zum Pixeln brauchen.
 # Wir müssen uns nun nur noch um das setzen der Pixel kümmern
-Matrix = PixelMatrix.UdpPixelMatrix(UDP_HOST)
+Matrix = PixelMatrix.UdpPixelMatrix()#UDP_HOST)
 #Matrix = PixelMatrix.PixelMatrix(HOST)
 
 Background = np.zeros(shape=(Matrix.Width,Matrix.Height,3), dtype=np.uint8)
@@ -287,11 +292,9 @@ paddel = PaddelData()
 position_class = Position()
 
 #for i in range(1,1000):
+lastSend = time()
 while 1:
-    Spielfeld = np.copy(Background)
-    scoreDisplay(score, Spielfeld)
-    Paddel(Spielfeld,0,paddel.left)
-    Paddel(Spielfeld,Matrix.Width-2,paddel.right)
+    
     if keyboard.is_pressed("p"):
         if paddel.right > 0:
             paddel.right -= 1
@@ -305,24 +308,36 @@ while 1:
     if keyboard.is_pressed("a"):
         if paddel.left < Matrix.Height-5:
             paddel.left += 1
-    
-    Ball(Spielfeld,trunc(position_class.position[0]),trunc(position_class.position[1]))
-    position_class.position, position_class.angle, scored = Flieg(Spielfeld, position_class.position, 1, position_class.angle)
-    if scored[0]:
-        #pruefe, ob Spiel zu Ende ist
-        if(scoredPoint(score ,scored[1])):
-            #beende Spiel
-            gameOverScreen(score, Matrix)
-            gameStartScreen(Matrix)
-            position_class.resetPosition()
-            paddel.resetPaddel()
-        else:
-            #resette Spielfeld für naechsten Turn
-            position_class.resetPosition()
-            paddel.resetPaddel()
+    sleep(0.04)
+    delay = time() - lastSend
+    if (delay > 0.080) :
+        
+        lastSend = time()
             
-    else:
-        Matrix.NdArray(Spielfeld)
-        #sleep(0.05)
+        Spielfeld = np.copy(Background)
+        scoreDisplay(score, Spielfeld)
+        Paddel(Spielfeld,0,paddel.left)
+        Paddel(Spielfeld,Matrix.Width-2,paddel.right)
+    
+        Ball(Spielfeld,trunc(position_class.position[0]),trunc(position_class.position[1]))
+        position_class.position, position_class.angle, scored = Flieg(Spielfeld, position_class.position, 1, position_class.angle)
+        if scored[0]:
+            #pruefe, ob Spiel zu Ende ist
+            if(scoredPoint(score ,scored[1])):
+                #beende Spiel
+                gameOverScreen(score, Matrix)
+                gameStartScreen(Matrix)
+                position_class.resetPosition()
+                paddel.resetPaddel()
+            else:
+                #resette Spielfeld für naechsten Turn
+                position_class.resetPosition()
+                paddel.resetPaddel()
+                
+        else:
+            Matrix.NdArray(Spielfeld)
+       
+        
+        
 
 
