@@ -256,7 +256,7 @@ def Flieg(aArray : np.ndarray ,Von, Speed, Winkel):
 # der Klasse PixelMatrix() aus der PixelMatrix Bibliothek
 # Dies übernimmt für uns alles, was wir zum Pixeln brauchen.
 # Wir müssen uns nun nur noch um das setzen der Pixel kümmern
-Matrix = PixelMatrix.UdpPixelMatrix()#UDP_HOST)
+Matrix = PixelMatrix.UdpPixelMatrix(UDP_HOST)
 #Matrix = PixelMatrix.PixelMatrix(HOST)
 
 Background = np.zeros(shape=(Matrix.Width,Matrix.Height,3), dtype=np.uint8)
