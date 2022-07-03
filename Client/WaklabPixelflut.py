@@ -1,6 +1,7 @@
 import socket
 import numpy as np
 from PIL import Image as PilImage
+from PIL import ImageEnhance
 import random
 import time
 import configparser
@@ -17,7 +18,7 @@ urllib3_cn.allowed_gai_family = allowed_gai_family
 #https://www.youtube.com/user/jschlingensiepen/live
 #https://wiki.maglab.space/wiki/PixelCompetition/Csharp
 
-
+gain = 2
 
 config = configparser.ConfigParser() 
 config.read(r"MatrixHost.ini")
@@ -28,7 +29,7 @@ print(HOST)
 PORT = 1337
 width = 60
 height = 33
-gain = 0.6
+pixelgain = 0.6
 
 offset_x = 1
 offset_y = 1
@@ -93,11 +94,6 @@ def square(x1,y1, x2, y2):
     line(x1,y2,x2,y2)
     line(x2,y2,x2,y1)
     line(x2,y1,x1,y1)
-
-def pushpicture(x,y,imgfile):
-    img = PilImage.open(imgfile)    
-    img = img.convert('RGBA')
-    pushimage(x,y,img)
     
 def pushimage(x,y,img):
     maxsize = (width, height)
@@ -108,10 +104,19 @@ def pushimage(x,y,img):
             x1 = i + x
             y1 = j + y
             if  arr[j][i][3]  > 0 :
-                drawpixel(x1,y1,int(arr[j][i][0]*gain),int(arr[j][i][1]*gain),int(arr[j][i][2]*gain))
+                drawpixel(x1,y1,int(arr[j][i][0]*pixelgain),int(arr[j][i][1]*pixelgain),int(arr[j][i][2]*pixelgain))
 
+def pushpicture(x,y,imgfile):
+    img1 = PilImage.open(imgfile)
+    enhancer = ImageEnhance.Brightness(img1)
+    img = enhancer.enhance(gain)
+    img = img.convert('RGBA')
+    pushimage(x,y,img)
+    
 def pushpicturerandom(x,y,imgfile):
-    img = PilImage.open(imgfile)    
+    img1 = PilImage.open(imgfile)
+    enhancer = ImageEnhance.Brightness(img1)
+    img = enhancer.enhance(gain)
     img = img.convert('RGBA')
     pushimage(x,y,img)
     

@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <driver/spi_master.h>
 #include <deque>
+#include "default.h"
 
 #include "ssid.h"
 int status = WL_IDLE_STATUS;
@@ -31,6 +32,7 @@ uint8_t udp_buffer[UDP_BUFFERSIZE];
 
 static const uint32_t BUFFER_SIZE = NUM_LEDS * 24;
 uint8_t* led_stream_buf;
+uint8_t* defaultbild;
 uint8_t* bitmapbuffer;
 uint16_t bitmappointer;
 const uint8_t spi_bus = HSPI;
@@ -147,6 +149,7 @@ void SetupDMA(void)
   led_stream_buf = (uint8_t*)heap_caps_malloc(BUFFER_SIZE, MALLOC_CAP_DMA);
   // Clear Buffer
   memset(led_stream_buf, WS2812_PWM_ZERO, BUFFER_SIZE);
+ 
   if_cfg.mode = SPI_MODE1;
   //if_cfg.clock_speed_hz = SPI_MASTER_FREQ_8M;  // too fast for bread board...
   if_cfg.clock_speed_hz = 7000000;             // seems Best for 800kHzW S2812
@@ -536,6 +539,15 @@ void setup() {
   downloadactive = false;
   bitmapbuffer =  (uint8_t*)heap_caps_malloc(BITMAP_SIZE, MALLOC_CAP_8BIT);
   bitmappointer = 0;
+
+  defaultbild =  (uint8_t*)heap_caps_malloc(5944, MALLOC_CAP_8BIT);
+  defaultbild[0] = 4;
+  defaultbild[1] = 1;
+  defaultbild[2] = 0;
+  defaultbild[3] = 0;
+  for (int i = 0; i< 5940; i++)
+    defaultbild[i+4] = myGraphic[i];
+  doNeo(defaultbild, 5944);
 }
 
 void loop(){

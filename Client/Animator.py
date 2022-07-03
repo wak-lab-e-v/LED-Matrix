@@ -10,10 +10,10 @@ from functools import wraps, lru_cache
 Display_Height = 33
 Display_Width  = 60
 
-Mode =  5
+Mode =  4
 
 
-gain = 3.7
+gain = 2.5
 
 #serverAddressPort   = ("192.168.188.114", 21324)
 #serverAddressPort   = ("192.168.188.115", 21324)
@@ -21,8 +21,8 @@ gain = 3.7
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.179.35", 21324)
 #serverAddressPort   = ('127.0.0.1', 21324)
-#serverAddressPort   = ("10.10.22.57", 21324)
-serverAddressPort   = ("127.0.0.1", 21324)
+serverAddressPort   = ("10.10.22.57", 21324)
+#serverAddressPort   = ("127.0.0.1", 21324)
 
 
 ##Value     Description     Max. LEDs
@@ -68,6 +68,21 @@ def PixelDecoder(x, y):
     return Zeile, Spalte
 
 def SendUDP(aMode, array):
+##    offset = 0
+##    laenge = 0
+##    with open('output.c','w') as f:
+##        while 1:
+##            if offset+10 < len(array):
+##                array_alpha = bytearray(array[offset:offset+10])
+##            else:
+##                array_alpha =  bytearray(array[offset:])
+##            laenge += len(array_alpha)
+##            f.write(' ,'.join('0x{:02x}'.format(x) for x in array_alpha)+',\n')
+##            offset+=10
+##            if offset >=  len(array):
+##                f.write('['+str(laenge)+']')
+##                break
+        
     offset = 0
     while True:
         if Mode == 4:
@@ -226,7 +241,7 @@ def PlayDir(aPath):
             Name = os.path.splitext(Dir)[0]
             Ext  = os.path.splitext(Dir)[1]
             print(Datei)
-            if (Ext in ['.png', '.jpg', '.bmp']):
+            if (Ext in ['.png', '.jpg', '.bmp']) and not os.path.split(Datei)[1].startswith('.'):
                 ShowPicture(Datei)
             if (Ext in ['.avi', '.mkv', '.mp4']):
                 AnimateMp4(Datei)
