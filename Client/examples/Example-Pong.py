@@ -272,6 +272,22 @@ def scoreDisplay(score:Score, aArray:np.ndarray):
                 aArray[help_x+x][y+1] = Weiss
 
 
+def ReflektionY(Winkel):
+    Einheitswinkel = Winkel
+    while Einheitswinkel > 270:
+        Einheitswinkel -= 360
+    while Einheitswinkel < -90:
+        Einheitswinkel += 360
+    if (Einheitswinkel > 90):
+        Einheitswinkel -=180
+        Einheitswinkel *= -1*(1+((random()-0.5)/4))
+        print(Einheitswinkel)
+    else:
+        Einheitswinkel +=180
+        Einheitswinkel *= -1*(1+((random()-0.5)/4))
+        print(Einheitswinkel)
+    return Einheitswinkel
+
 def Flieg(aArray : np.ndarray ,Von, Speed, Winkel):
     x = Von[0]+RotateX(Speed,0,Winkel)
     y = Von[1]+RotateY(Speed,0,Winkel)
@@ -281,13 +297,13 @@ def Flieg(aArray : np.ndarray ,Von, Speed, Winkel):
     if x > Matrix.Width-2:
         #pruefe, ob Ball gegen Paddel läuft
         if (aArray[Matrix.Width-1,int(y)] == Weiss).all() or (aArray[Matrix.Width-1,int(y+1)] == Weiss).all():
-            Winkel = 180 - Winkel*1.1
+            Winkel = ReflektionY(Winkel)  #180 - Winkel*1.1
         else:
             scored = [True, LEFT]
     if x < 2:
         #pruefe, ob Ball gegen Paddel läuft
         if (aArray[1,int(y)] == Weiss).all() or (aArray[1,int(y+1)] == Weiss).all():
-            Winkel = 0 - (Winkel*1.1-180)
+            Winkel = ReflektionY(Winkel) # 0 - (Winkel*1.1-180)
         else:
             scored = [True, RIGHT]
     if y > Matrix.Height-2:
