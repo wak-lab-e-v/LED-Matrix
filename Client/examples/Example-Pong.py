@@ -390,8 +390,8 @@ if __name__ == '__main__':
     if (port := findPort()):
         ser = serial.Serial()
         ser.port = port
-        ser.baudrate = 4800
-        ser.timeout = 0.05
+        ser.baudrate = 38400
+        ser.timeout = 0.015
         ser.open()
         sleep(0.15)
         ser.flushInput()
