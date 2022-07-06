@@ -65,7 +65,7 @@ def findPort():
             for port in com_ports_list:
                 #inkex.errormsg(gettext.gettext(str(port[1])))
                 print(port[1])
-                if port[1].startswith("USB-SERIAL CH340"): # Nano
+                if port[1].startswith("USB-SERIAL CH340") or port[1].startswith("USB Serial"): # Nano
                     serial_portname = port[0]  # Success; EBB found by name match.
                     break  # stop searching-- we are done.
 
