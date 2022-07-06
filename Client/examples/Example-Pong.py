@@ -412,7 +412,7 @@ if __name__ == '__main__':
         sleep(0.15)
         ser.flushInput()
         sleep(3.15)
-        ser.write('X'.encode('ANSI')) # deaktivieren wenn möglich den 433MHz Sender
+        ser.write('X'.encode('cp1252')) # deaktivieren wenn möglich den 433MHz Sender
         
 
     #for i in range(1,1000):
