@@ -226,6 +226,19 @@ class PixelMatrix():
             self.ClientSocket.send(cmd.encode())
             #print(self.ClientSocket.recv(180).decode())
 
+    def Getpixel(self,x,y):
+        if (x>0) and (y>0) and (x <= self.Width) and (y <= self.Height):
+            cmd = "GP %d %d\n" % (x,y)
+            while len(self.ClientSocket.recv(5))>0:
+                pass
+            self.ClientSocket.send(cmd.encode())
+            answer = self.ClientSocket.recv(180).decode().split()
+            print(answer)
+            if (len(answer) >= 6):
+                #color = bytes.fromhex(answer[3][1:])
+                return tuple(int(answer[3]),int(answer[4]),int(answer[5]))
+            return None
+        
     def Black(self):
         for i in range (1, self.Width+1 ):
             for j in range(1,self.Height+1):

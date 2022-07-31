@@ -9,7 +9,7 @@
 
 #include "ssid.h"
 int status = WL_IDLE_STATUS;
-char server[] = SERVER;
+char server[20];
 #define MATRIX_WIDTH  60
 #define MATRIX_HEIGHT 33
 
@@ -245,6 +245,12 @@ void SetupWiFi(void)
     Serial.println("");
     Serial.print("No known Networks in ssid.h ");
   }
+  
+  if (knownNetwork == 0)
+    strcpy(server, LOCAL_SERVER); 
+  else
+    strcpy(server, SERVER);
+
   
 }
 
@@ -585,6 +591,7 @@ void loop(){
       if (!Connected && (myTime > Web_Timer + 400))
       {
         Serial.println("connected to server");
+        Serial.println(server);
         if (client.connect(server, SOCKET_PORT)) {
           client.println("GM");
           Serial.println("GM");
