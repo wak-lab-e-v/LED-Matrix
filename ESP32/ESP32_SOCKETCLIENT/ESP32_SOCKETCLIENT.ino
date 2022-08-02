@@ -10,8 +10,9 @@
 #include "ssid.h"
 int status = WL_IDLE_STATUS;
 char server[20];
-#define MATRIX_WIDTH  60
+#define MATRIX_WIDTH  60  
 #define MATRIX_HEIGHT 33
+#define UDP_DELAY  59
 
 #define UDP_PORT 21324
 #define SOCKET_PORT 1337
@@ -28,7 +29,8 @@ uint8_t udp_buffer[UDP_BUFFERSIZE];
 #define LED_PIN 13   // MOSI
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER RGB
-#define NUM_LEDS 1980 // 512
+#define NUM_LEDS (MATRIX_WIDTH*MATRIX_HEIGHT) // 1980 // 512
+//static const uint32_t UDP_DELAY = 20; //((59000 / 1980) * NUM_LEDS) / 1000;
 
 static const uint32_t BUFFER_SIZE = NUM_LEDS * 24;
 uint8_t* led_stream_buf;
@@ -46,7 +48,7 @@ uint8_t  UDP_Timeout = 20;
 boolean connected = false;
 uint16_t LED_Pointer;
 uint32_t width, height;
-
+boolean ledState;
 WiFiClient client;
 boolean Connected;
 
@@ -546,14 +548,14 @@ void setup() {
   bitmapbuffer =  (uint8_t*)heap_caps_malloc(BITMAP_SIZE, MALLOC_CAP_8BIT);
   bitmappointer = 0;
 
-  defaultbild =  (uint8_t*)heap_caps_malloc(5944, MALLOC_CAP_8BIT);
+  defaultbild =  (uint8_t*)heap_caps_malloc(4+NUM_LEDS*3, MALLOC_CAP_8BIT);
   defaultbild[0] = 4;
   defaultbild[1] = 1;
   defaultbild[2] = 0;
   defaultbild[3] = 0;
-  for (int i = 0; i< 5940; i++)
+  for (int i = 0; i< (NUM_LEDS*3); i++)
     defaultbild[i+4] = myGraphic[i];
-  doNeo(defaultbild, 5944);
+  doNeo(defaultbild, 4+NUM_LEDS*3);
 }
 
 void loop(){
@@ -633,7 +635,7 @@ void loop(){
         
         //if (bitmappointer == MATRIX_WIDTH*MATRIX_HEIGHT*6+2)
         //  doASCIImap(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
-        if ((bitmappointer >= MATRIX_WIDTH*MATRIX_HEIGHT*3) && (bitmappointer < MATRIX_WIDTH*MATRIX_HEIGHT*3+6))
+        if ((bitmappointer >= NUM_LEDS*3) && (bitmappointer < NUM_LEDS*3+6))
           doBinary(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
         Connected = client.connected();
         if (Connected)
@@ -653,11 +655,20 @@ void loop(){
 
 
   
-  if (myTime >= (starttime + 59)) // 17 fps
+  if (myTime >= (starttime + UDP_DELAY)) // 17 fps
   { 
     starttime = myTime;
     //Serial.println("DMA");
     DMATransfer(led_stream_buf, BUFFER_SIZE);
+    if (ledState == LOW) {
+      ledState = HIGH;
+    } else {
+      ledState = LOW;
+    }
+    digitalWrite(ONBOARD_LED, ledState);
+
+    // set the LED with the ledState of the variable:
+    
   }
 }
 
