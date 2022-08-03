@@ -2,7 +2,7 @@ import PixelMatrix
 from time import sleep
 import configparser
 config = configparser.ConfigParser() 
-config.read(r"..\..\..\MatrixHost.ini")
+config.read(r"../../MatrixHost.ini")
 HOST = config.get("Pixelserver","Host")
 UDP_HOST = config.get("WLED Server","Host")
 
@@ -13,6 +13,7 @@ Rot   = (255, 0, 0)
 Gruen = (0, 255, 0)
 Blau  = (0, 0, 255)
 Lila  = (200,100,200)
+Schwarz  = (0,0,0)
 
 # Wir erzeugen eine Instanz Namens ,,Matrix``
 # der Klasse PixelMatrix() aus der PixelMatrix Bibliothek
@@ -22,9 +23,14 @@ Lila  = (200,100,200)
 Matrix = PixelMatrix.PixelMatrix(HOST)
 Matrix.Black()
 
-x = 0
-y = 30
-for i in range(1,31):
-    Matrix.Putpixel(i,y-i, Weiss)
+
+#Matrix.Putpixel(10,30, Weiss)
+
+for i in range(14,60):
+    Matrix.Putpixel(i,21, Blau)
+    Matrix.Putpixel(i-8,21, Schwarz)
+    sleep(0.5)
+
+
 
 

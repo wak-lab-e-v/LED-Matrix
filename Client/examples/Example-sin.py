@@ -2,7 +2,7 @@ import PixelMatrix
 from math import sin
 import configparser
 config = configparser.ConfigParser() 
-config.read(r"..\..\..\MatrixHost.ini")
+config.read(r"../../MatrixHost.ini")
 HOST = config.get("Pixelserver","Host")
 UDP_HOST = config.get("WLED Server","Host")
 
