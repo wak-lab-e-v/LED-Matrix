@@ -1,6 +1,6 @@
 # Credentials
 Client/MatrixHost.ini
-MatrixHost.ini
+/MatrixHost.ini
 ESP32/ssid.h
 ssid.h
 
@@ -36,4 +36,5 @@ ssid.h
 *.exe
 *.out
 *.app
+
 
