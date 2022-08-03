@@ -1,7 +1,7 @@
 import PixelMatrix
 import configparser
 config = configparser.ConfigParser() 
-config.read(r"../../../MatrixHost.ini")
+config.read("../../../MatrixHost.ini")
 HOST = config.get("Pixelserver","Host")
 UDP_HOST = config.get("WLED Server","Host")
 
