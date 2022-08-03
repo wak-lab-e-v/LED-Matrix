@@ -3,7 +3,7 @@ from time import sleep
 import configparser
 import keyboard
 config = configparser.ConfigParser() 
-config.read(r"../../MatrixHost.ini")
+config.read(r"../../../MatrixHost.ini")
 HOST = config.get("Pixelserver","Host")
 UDP_HOST = config.get("WLED Server","Host")
 

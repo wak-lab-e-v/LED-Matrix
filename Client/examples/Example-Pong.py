@@ -437,9 +437,9 @@ if __name__ == '__main__':
             paddel.left = SerPosLinks
             paddel.right = SerPosRechts
             
-        sleep(0.04)
+        sleep(0.02)
         delay = time() - lastSend
-        if (delay > 0.080) :
+        if (delay > 0.040) :
             
             lastSend = time()
                 
