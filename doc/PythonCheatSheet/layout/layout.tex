@@ -1,0 +1,76 @@
+\documentclass[notumble,10pt,a4paper]{leaflet} 
+
+% notumble - By default (tumble) the contents of the backside sheet is printed upside down. The option no tumble supresses that.
+
+% Please find the remaining options at http://ctan.math.illinois.edu/macros/latex/contrib/leaflet/leaflet-manual.pdf
+\usepackage[utf8x]{inputenc}
+\usepackage{fontspec}
+
+\usepackage{color}
+\usepackage{flowfram}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{hyperref}      % For including urls
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{setspace}    % Adjust line spacing    
+\onehalfspacing          % Adjust line spacing  \doublespacing 
+\usepackage[inline]{enumitem}
+\usepackage{capt-of}
+%\titleformat*{\subsection}{\color{Blue}}
+
+%FONT Change
+%\renewcommand{\familydefault}{cmss} 
+%To Draw a horizontal Line
+\newcommand{\sectionline}{
+  \nointerlineskip \vspace{\baselineskip}
+  \hspace{\fill}\rule{0.8\linewidth}{.7pt}\hspace{\fill}
+  \par\nointerlineskip \vspace{\baselineskip}
+}
+%\AddToBackground{2}{\includegraphics[width=29.7cm]{bkf}}
+%\AddToBackground{2}{\includegraphics[width=29.7cm]{cmy}}
+
+% To create a border along the top of each page
+% To change border color just search on internet for cmyk colour codes and change the values in the brackets after the option cmyk
+
+\vtwotonetop{1cm}{0.6\paperwidth}{[cmyk]{0.35,0,0.67,0.41}}{topleft}%
+{0.4\paperwidth}{[cmyk]{0.35,0,0.67,0.41}}{topright}
+
+% To create a border along the bottom of each page
+% To change border color just search on internet for cmyk colour codes and change the values in the brackets after the option cmyk
+
+\vtwotonebottom{1cm}{0.6\paperwidth}{[cmyk]{0.35,0,0.67,0.41}}{bottomleft}%
+{0.4\paperwidth}{[cmyk]{0.35,0,0.67,0.41}}{bottomright}
+
+
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=none,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}

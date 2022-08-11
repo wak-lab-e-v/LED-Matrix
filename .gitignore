@@ -1,6 +1,7 @@
 # Credentials
 Client/MatrixHost.ini
-/MatrixHost.ini
+Simulation/MatrixHost.ini
+MatrixHost.ini
 ESP32/ssid.h
 ssid.h
 
@@ -38,3 +39,4 @@ ssid.h
 *.app
 
 
+/Client/examples/PixelMatrix/__pycache__/PixelMatrix.cpython-38.pyc

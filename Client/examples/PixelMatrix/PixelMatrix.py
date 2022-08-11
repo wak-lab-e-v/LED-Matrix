@@ -1,7 +1,7 @@
 import socket
 import time
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageSequence
 from threading import Thread, Event
 from functools import wraps, lru_cache
 
@@ -197,7 +197,35 @@ class UdpPixelMatrix():
             for j in range(1,self.Height+1):
                 #print(i,j)
                 self.Putpixel(i,j,aArray[i-1][j-1])
-    
+                
+    def Picture(self, aFilename, x=1,y=1):
+        frame = Image.open(aFilename)
+        imagesize = frame.size
+        size = (self.Width - x, self.Height - y)
+        size = (min(size[0],imagesize[0]), min(size[1],imagesize[1]))
+        im = frame.copy()
+        im.thumbnail(size)
+        im = im.convert('RGBA')
+        arr = np.array(im)
+        for i in range (0, im.size[0]):
+            for j in range(0,im.size[1]):
+                self.Putpixel(x+i,y+j,arr[j,i])
+
+    def AnimateGif(self, filename, x=1,y=1):
+        img = Image.open(filename)
+        for i,frame in enumerate(ImageSequence.Iterator(img)):
+            imagesize = frame.size
+            size = (self.Width - x, self.Height - y)
+            size = (min(size[0],imagesize[0]), min(size[1],imagesize[1]))
+            im = frame.copy()
+            im.thumbnail(size)
+            im = im.convert('RGBA')
+            arr = np.array(im)
+            for i in range (0, im.size[0]):
+                for j in range(0,im.size[1]):
+                    self.Putpixel(x+i,y+j,arr[j,i])
+            time.sleep(frame.info['duration']/1000)
+ 
 
 class PixelMatrix():
     def __init__(self, Pixelserver='127.0.0.1', Port = 1337):
@@ -224,6 +252,7 @@ class PixelMatrix():
             #cmd = "PX 20 20 #FFFFFF\n"
             #cmd = 'HELP\n'
             self.ClientSocket.send(cmd.encode())
+            self.ClientSocket.recv
             #print(self.ClientSocket.recv(180).decode())
 
     def Getpixel(self,x,y):
@@ -254,6 +283,35 @@ class PixelMatrix():
             for j in range(1,self.Height+1):
                 #print(i,j)
                 self.Putpixel(i,j,aArray[i-1][j-1])
+                
+    def Picture(self, aFilename, x=1,y=1):
+        frame = Image.open(aFilename)
+        imagesize = frame.size
+        size = (self.Width - x, self.Height - y)
+        size = (min(size[0],imagesize[0]), min(size[1],imagesize[1]))
+        im = frame.copy()
+        im.thumbnail(size)
+        im = im.convert('RGBA')
+        arr = np.array(im)
+        for i in range (0, im.size[0]):
+            for j in range(0,im.size[1]):
+                self.Putpixel(x+i,y+j,arr[j,i])
+                
+
+    def AnimateGif(self, filename, x=1,y=1):
+        img = Image.open(filename)
+        for i,frame in enumerate(ImageSequence.Iterator(img)):
+            imagesize = frame.size
+            size = (self.Width - x, self.Height - y)
+            size = (min(size[0],imagesize[0]), min(size[1],imagesize[1]))
+            im = frame.copy()
+            im.thumbnail(size)
+            im = im.convert('RGBA')
+            arr = np.array(im)
+            for i in range (0, im.size[0]):
+                for j in range(0,im.size[1]):
+                    self.Putpixel(x+i,y+j,arr[j,i])
+            time.sleep(frame.info['duration']/1000)
 
 if __name__ == "__main__":
     Matrix = UdpPixelMatrix()
