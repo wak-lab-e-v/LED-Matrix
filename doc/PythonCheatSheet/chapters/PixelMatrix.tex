@@ -31,7 +31,7 @@ Hier geben wir die Helligkeit der einzelnen Farbtöne an. In Klammern erst Rot, 
 \end{minipage}
 
 \subsection{\large{Das Matrix Objekt}}
-Man spricht von Objekt wenn so ein Ding baut, was Dinge tun kann. Ich hätte ihm auch einen anderen Namen geben können, aber nun heist es Matrix. \\
+Man spricht beim Programmieren von einem Objekt wenn man eine Variable hat, die eingebaute Funktionen hat, die Sachen machen können. Ich habe das Objekt Matrix genannt.\\
 %Das kann man sich so vorstellen, dass man wenn man nun im %Katalog ein schönes Buch gesehen hat, dann kaufen wir uns das jetzt auch und nennen es Matrix.\\
 \begin{lstlisting}[language=Python, caption=Das Matrix Objekt]
 Matrix = PixelMatrix.PixelMatrix(HOST)
@@ -58,9 +58,9 @@ Um einen Befehl mehrmals auszuführen brauchen wir eine Schleife. Dafür nehmen 
 for i in range(10,20):
 	Matrix.Putpixel(i,10,Rot)
 \end{lstlisting}
-In Python benutzt man die Tabulatortaste um einen Befehl einzurücken der innerhalb der Schleife mehrmals ausgeführt wird. Die Angabe range(10,20) lässt i von 10 bis 19 durchzählen, und nun setzen wir damit 10 Punkte von x=10..19 und y=10. \\
+In Python benutzt man die Tabulatortaste um einen Befehl einzurücken der innerhalb der Schleife mehrmals ausgeführt wird. Die Angabe range(10,20) lässt i von 10 bis 19 durchzählen, und nun setzen wir damit 10 Punkte von x=10..19 und y ist fest 10. \\
 \ \\
-Damit man eine Punkt auch wieder löschen könnt, malen wir einfach einen schwarzen Punkt und zwar 3 Pixel hinter dem Roten. Damit es nicht zu schnell geht warten wir kurz 0,5 Sekunden:
+Damit wir einen Punkt auch wieder löschen können, malen wir einfach einen schwarzen Punkt und zwar 3 Pixel links von dem Roten. Um es sehen zu können, warten wir nach jedem Punkt 0,5 Sekunden:
 \begin{lstlisting}[language=Python, caption=For Schleifen]
 for i in range(10,20):
 	Matrix.Putpixel(i,10,Rot)
@@ -69,7 +69,7 @@ for i in range(10,20):
 \end{lstlisting}
 
 \subsection{\large{Wir malen ein Bild}}
-Natürlich haben wir auch vorbereitet, dass man ein Bild an die Matrix projizieren kann. Dafür gibt es die Picture() und die AnimateGif() Funktionen. Wenn wir also ein kleines Bild in das Verzeichnis legen, können wir es laden und anzeigen.
+Natürlich haben wir auch vorbereitet, dass man ein Bild an die Matrix projizieren kann. Dafür gibt es die Funktionen Picture() und AnimateGif(). Wenn wir also ein kleines Bild in das Verzeichnis legen, können wir es laden und anzeigen.
 \begin{lstlisting}[language=Python, caption=Ein Bild]
 Matrix.Picture("NeueWelten.png", 10,0)
 \end{lstlisting}
