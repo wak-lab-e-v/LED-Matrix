@@ -314,6 +314,7 @@ class PixelMatrix():
             time.sleep(frame.info['duration']/1000)
 
 if __name__ == "__main__":
+    pass
     #Matrix = UdpPixelMatrix()
     #xImage = MxImage('Fox-Face2.png')
     #Matrix.White()
