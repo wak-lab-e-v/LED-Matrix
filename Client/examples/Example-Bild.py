@@ -25,5 +25,5 @@ Schwarz  = (0,0,0)
 Matrix = PixelMatrix.PixelMatrix(HOST)
 Matrix.Black()
 
-
-Matrix.Picture('NeueWelten.png', 10,1)
+Matrix.AnimateGif('NeueWelten.gif', 10,0)
+Matrix.AnimateGif('NeueWelten.gif', 10,0)

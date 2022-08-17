@@ -5,9 +5,9 @@ import cv2
 import numpy as np
 from tkinter import *
 from tkinter import filedialog
-
-Display_Height = 33
 Display_Width  = 60
+Display_Height = 33
+
 gain = 2.5
 
 
