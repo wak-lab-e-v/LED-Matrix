@@ -3,10 +3,21 @@ from time import sleep
 import configparser
 import keyboard
 from random import random
-config = configparser.ConfigParser() 
-config.read("../../../MatrixHost.ini")
-HOST = config.get("Pixelserver","Host")
-UDP_HOST = config.get("WLED Server","Host")
+from os import path
+
+IniFile = "MatrixHost.ini" 
+for _ in range (3):
+    if path.exists(IniFile):
+        break
+    IniFile = "../" + IniFile
+
+if path.exists(IniFile):
+    config = configparser.ConfigParser() 
+    config.read(IniFile)
+    HOST = config.get("Pixelserver","Host")
+    UDP_HOST = config.get("WLED Server","Host")
+else:
+    print("Inifile not found!")
 
 # Additive Farbmischung
 # aus Rot, Grün und Blauanteil
