@@ -5,10 +5,10 @@ import cv2
 import numpy as np
 from tkinter import *
 from tkinter import filedialog
-Display_Width  = 60
-Display_Height = 33
+Display_Width  = 56
+Display_Height = 32
 
-gain = 2.5
+gain = 1.5
 
 
 w,h = Display_Width, Display_Height
@@ -18,26 +18,29 @@ OutputArray = np.zeros(t,dtype=np.uint8)
 GammaTable = np.array([((i / 255.0) ** 2.6) * 32.0+0.5 # gamma 2.6
     for i in np.arange(0, 256)]).astype("uint8")
 
-def PixelDecoder(x, y):
-    if Display_Width <= Display_Width:
-        Zeile  = y  # von oben nach unten wie auch in den Bildern
-        if ((Zeile % 2) == 0):
-            Spalte = x
-        else:
-            Spalte = (Display_Width-1) - x
+
+
+def PixelDecoderSnake(x, y):
+    Zeile  = y  # von oben nach unten wie auch in den Bildern
+    if ((Zeile % 2) == 0):
+        Spalte = x
     else:
-        Zeile  = y if (x < Display_Width) else y + Display_Height # von oben nach unten wie auch in den Bildern
-        if ((Zeile % 2) != 0):
-            Spalte = x % Display_Width
-        else:
-            Spalte = (Display_Width-1) - (x % Display_Width)
-    return Zeile, Spalte
+        Spalte = (Display_Width-1) - x
+    return Zeile * Display_Width + Spalte
+
+def PixelDecoderChaos(x, y):
+    segment = int(x / 8)
+    if y % 2 == 0:
+        x2 = x
+    else:
+        x2 = 7-x
+    return 255+(segment*256)-(x2%8)-(y*8)  
 
 def Putpixel(x,y,aColor):
     color = [GammaTable[aColor[0]], GammaTable[aColor[1]], GammaTable[aColor[2]]]  ## RGB
-    Zeile, Spalte = PixelDecoder(x, y)
+    offset = PixelDecoder(x, y)
     #print(Spalte,Zeile)
-    OutputArray[Zeile * Display_Width + Spalte] = color;
+    OutputArray[offset] = color;
 
     
 def Image2C(filename):
@@ -71,6 +74,11 @@ def Image2C(filename):
         f.write('};\n')
 
 if __name__ == "__main__":
+    if Display_Width == 56:
+        PixelDecoder = PixelDecoderChaos
+    else:
+        PixelDecoder = PixelDecoderSnake
+    
     fenster = Tk()
     fenster.filename = ""
     fenster.filename = filedialog.askopenfilename(initialdir = "./", title = "Picture", filetypes =(("all files","*"),("Bitmap files","*.bmp")))

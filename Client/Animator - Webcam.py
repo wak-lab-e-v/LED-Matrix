@@ -12,6 +12,7 @@ Display_Width  = 60
 
 Mode =  5
 
+
 gain = 1.2
 
 #serverAddressPort   = ("192.168.188.114", 21324)
@@ -19,10 +20,11 @@ gain = 1.2
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.178.39", 21324)
 #serverAddressPort   = ("192.168.179.35", 21324)
+#serverAddressPort   = ('127.0.0.1', 21324)
 serverAddressPort   = ("10.10.22.57", 21324)
-#serverAddressPort   = ("192.168.1.226", 21324) # WAKLAB OPenWRT
-serverAddressPort   = ("127.0.0.1", 21324)
+#serverAddressPort   = ("127.0.0.1", 21324)
 
+#serverAddressPort   = ("192.168.1.226", 21324)
 
 ##Value     Description     Max. LEDs
 ##1     WARLS   255
@@ -51,20 +53,23 @@ GammaTable = np.array([((i / 255.0) ** 2.6) * 32.0+0.5 # gamma 2.6
 # Create a UDP socket at client side
 
 @lru_cache(maxsize=None)
-def PixelDecoder(x, y):
-    if Display_Width <= Display_Width:
-        Zeile  = y  # von oben nach unten wie auch in den Bildern
-        if ((Zeile % 2) == 0):
-            Spalte = x
-        else:
-            Spalte = (Display_Width-1) - x
+def PixelDecoderSnake(x, y):
+    Zeile  = y  # von oben nach unten wie auch in den Bildern
+    if ((Zeile % 2) == 0):
+        Spalte = x
     else:
-        Zeile  = y if (x < Display_Width) else y + Display_Height # von oben nach unten wie auch in den Bildern
-        if ((Zeile % 2) != 0):
-            Spalte = x % Display_Width
-        else:
-            Spalte = (Display_Width-1) - (x % Display_Width)
-    return Zeile, Spalte
+        Spalte = (Display_Width-1) - x
+
+    return Zeile * Display_Width + Spalte
+
+@lru_cache(maxsize=None)
+def PixelDecoderChaos(x, y):
+    segment = int(x / 8)
+    if y % 2 == 0:
+        x2 = x
+    else:
+        x2 = 7-x
+    return 255+(segment*256)-(x2%8)-(y*8) 
 
 def SendUDP(aMode, array):
     offset = 0
@@ -107,16 +112,17 @@ def Putpixel(x,y,aColor):
         color = [GammaTable[aColor[0]], GammaTable[aColor[1]], GammaTable[aColor[2]]]  ## RGB
     else:
         color = one_word(GammaTable[aColor[0]], GammaTable[aColor[1]], GammaTable[aColor[2]])  ## RGB
-    Zeile, Spalte = PixelDecoder(x, y)
+    offset = PixelDecoder(x, y)
     #print(Spalte,Zeile)
-    OutputArray[Zeile * Display_Width + Spalte] = color;
+    OutputArray[offset] = color;
     
-@lru_cache(maxsize=None)
 def Black():
-    for i in range (0, Display_Width ):
-        for j in range(0,Display_Height):
-            #print(i,j)
-            Putpixel(i,j,[0,0,0])
+    OutputArray.fill(0)
+    #for i in range (0, Display_Width ):
+    #    for j in range(0,Display_Height):
+    #        #print(i,j)
+    #        Putpixel(i,j,[0,0,0])
+            
     
 def Desktop():
     import pyautogui
@@ -169,7 +175,7 @@ def ShowPicture(filename):
 
 def AnimateGif(filename):
     img = Image.open(filename)
-    for i in range(5):
+    for _ in range(5):
         for i,frame in enumerate(ImageSequence.Iterator(img)):
             frm = frame.convert('RGBA') 
             enhancer = ImageEnhance.Brightness(frm)
@@ -186,33 +192,31 @@ def AnimateGif(filename):
             time.sleep(frame.info['duration']/1000)
 
 def AnimateMp4(filename):
-     video = cv2.VideoCapture(filename)
-     while True:
-        ret,frame = video.read() 
-        if ret: 
-            maxsize = (Display_Width, Display_Height) 
-            im = cv2.resize(frame,maxsize,interpolation=cv2.INTER_AREA)
-            im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+    video = cv2.VideoCapture(filename)
+    for _ in range(5):
+        while True:
+            ret,frame = video.read() 
+            if ret: 
+                maxsize = (Display_Width, Display_Height) 
+                im = cv2.resize(frame,maxsize,interpolation=cv2.INTER_AREA)
+                im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+                frame = Image.fromarray(im)
+                enhancer = ImageEnhance.Brightness(frame)
+                im_pil = enhancer.enhance(gain)
+                im = im_pil.copy()
+                im = im.convert('RGBA')
+                arr = np.array(im)
 
-            hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-            h, s, v = cv2.split(hsv)
-            v += round(10*gain)
-            final_hsv = cv2.merge((h, s, v))
-            im = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
-
-            #im    = imRes.convert('RGB')
-            #arr = np.array(im)
-            #print(im.shape)
-            for i in range (0, im.shape[1]):
-                for j in range(0,im.shape[0]):
-                    #print(i,j)
-                    Putpixel(i,j,im[j,i])
-            SendUDP(Mode, OutputArray)
-            time.sleep(0.025)
-        else:
-            break
-            
-
+                #print(im.shape)
+                for i in range (0, im.size[0]):
+                    for j in range(0,im.size[1]):
+                        #print(i,j)
+                        Putpixel(i,j,arr[j,i])
+                SendUDP(Mode, OutputArray)
+                #time.sleep(0.025)
+            else:
+                break
+                
 
     
 # Send to server using created UDP socket
@@ -244,7 +248,7 @@ def PlayDir(aPath):
             Name = os.path.splitext(Dir)[0]
             Ext  = os.path.splitext(Dir)[1]
             print(Datei)
-            if (Ext in ['.png', '.jpg', '.bmp']):
+            if (Ext in ['.png', '.jpg', '.bmp']) and not os.path.split(Datei)[1].startswith('.'):
                 ShowPicture(Datei)
             if (Ext in ['.avi', '.mkv', '.mp4']):
                 AnimateMp4(Datei)
@@ -295,6 +299,11 @@ def Webcam():
 #msg = "Message from Server {}".format(msgFromServer[0])
 
 if __name__ == "__main__":
+    if Display_Width == 56:
+        PixelDecoder = PixelDecoderChaos
+    else:
+        PixelDecoder = PixelDecoderSnake
+        
     UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) #SOCK_DGRAM) #SOCK_STREAM)
     Black()
     Webcam()

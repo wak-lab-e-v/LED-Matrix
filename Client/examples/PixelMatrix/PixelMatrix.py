@@ -29,72 +29,18 @@ from functools import wraps, lru_cache
 DefaultWidth  = 60
 DefaultHeight = 33
 
-class MxImage():
-    def __init__(self, aImage):
-        if isinstance(aImage, str):
-            img = self.LoadImage(aImage)
-        else:
-            if isinstance(aImage, numpy.ndarray):
-                img = Image.fromarray(aImage)
-                img = img.convert('RGBA')
-            else:
-                img = aImage # PIL.Image.Image
-        self.Sprite = np.array(img)
-        self.Height = DefaultHeight
-        self.Width  = DefaultWidth
-        self.Background = np.ones(shape=(self.Width,self.Height,4))
-        self.Foreground = np.zeros(shape=(self.Width,self.Height,4))       
-        #arr1 = np.array(im)
-
-    def LoadImage(self, imgfile):
-        img = Image.open(imgfile)
-        return img.convert('RGBA')
-
-    def Position(x,y):
-        dim = np.shape(self.Sprite)
-        for i in range (0, dim[0]):
-            for j in range(0,dim[1]):
-                x1 = i + x
-                y1 = j + y
-                if  arr[j][i][3]  > 0 :
-                    drawpixel(x1,y1, arr[j][i][0] , arr[j][i][1], arr[j][i][2])        
-        
-
-
-##        for j in range (0, imageObject.size[0]):
-##            for i in range(0,imageObject.size[1]):
-##                if (arr0[i][j][0] == arr1[i][j][0]) and (arr0[i][j][1] == arr1[i][j][1]) and (arr0[i][j][2] == arr1[i][j][2]):
-##                    arr1[i][j][3] = 0
-##        imo = Image.fromarray(arr1)
-##
-##
-##        def pushpicture(x,y,imgfile):
-##    img = Image.open(imgfile)    
-##    img = img.convert('RGBA')
-##    pushimage(x,y,img)
-##    
-##def pushimage(x,y,img):
-##    maxsize = (width, height)
-##    if (img.size[0] > width) or (img.size[1] > height):
-##        img = img.resize(maxsize);
-##    arr = np.array(img)
-##    cmd = ""
-##    for i in range (0, img.size[0]):
-##        for j in range(0,img.size[1]):
-##            x1 = i + x
-##            y1 = j + y
-##            if  arr[j][i][3]  > 0 :
-##                drawpixel(x1,y1, arr[j][i][0] , arr[j][i][1], arr[j][i][2])
-##
-
                 
-
 class UdpPixelMatrix():
-    def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True):
+    def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True, Dim = (DefaultWidth, DefaultWidth)):
         self.serverAddressPort = (UDPserver, Port)
         self.lastSend = int(round(time.time() * 1000))
-        self.Height = DefaultHeight
-        self.Width  = DefaultWidth
+        self.Height = Dim[1]
+        self.Width  = Dim[0]
+        if Dim[0] == 56:
+            self.PixelDecoder = self.PixelDecoderChaos
+        else:
+            self.PixelDecoder = self.PixelDecoderSnake
+            
         self.OutputArray = np.zeros((self.Height*self.Width,3),dtype=np.uint8)
         self.Mode =  Mode;
         self.MaxLight = 0x3f
@@ -107,7 +53,7 @@ class UdpPixelMatrix():
             send_thread.start()
             
     @lru_cache(maxsize=None)
-    def PixelDecoder(self, x, y):
+    def PixelDecoderSnake(self, x, y):
         if (y == 0):
             y = 1
         if (x == 0):
@@ -118,7 +64,22 @@ class UdpPixelMatrix():
             Spalte = x-1
         else:
             Spalte = (self.Width-1) - (x-1)
-        return Zeile, Spalte
+        return Zeile * self.Width + Spalte
+    
+    @lru_cache(maxsize=None)
+    def PixelDecoderChaos(self, x, y):
+        if (y == 0):
+            y = 1
+        if (x == 0):
+            x = 1
+        x = x-1
+        y = y-1
+        segment = int(x / 8)
+        if y % 2 == 0:
+            x2 = x
+        else:
+            x2 = 7-x
+        return 255+(segment*256)-(x2%8)-(y*8)  
 
     def cyclic_send(self):
         while not self.stop.isSet():
@@ -178,9 +139,9 @@ class UdpPixelMatrix():
             color = [self.GammaTable[aColor[0]], self.GammaTable[aColor[1]], self.GammaTable[aColor[2]]]  ## RGB
         else:
             color = self.Color16(self.GammaTable[aColor[0]], self.GammaTable[aColor[1]], self.GammaTable[aColor[2]])  ## RGB
-        Zeile, Spalte = self.PixelDecoder(x, y)
+        offset = self.PixelDecoder(x, y)
 
-        self.OutputArray[Zeile * self.Width + Spalte] = color;
+        self.OutputArray[offset] = color;
 
     def Black(self):
         for i in range (1, self.Width+1 ):
@@ -228,12 +189,12 @@ class UdpPixelMatrix():
  
 
 class PixelMatrix():
-    def __init__(self, Pixelserver='127.0.0.1', Port = 1337):
+    def __init__(self, Pixelserver='127.0.0.1', Port = 1337, Dim = (DefaultWidth, DefaultWidth)):
         self.serverAddressPort = (Pixelserver, Port)
         print('Connected to', Pixelserver, Port) 
         self.lastSend = int(round(time.time() * 1000))
-        self.Height = DefaultHeight
-        self.Width  = DefaultWidth
+        self.Height = Dim[1]
+        self.Width  = Dim[0]
 
         self.ClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.ClientSocket.settimeout(0.1)
@@ -258,10 +219,9 @@ class PixelMatrix():
     def Getpixel(self,x,y):
         if (x>0) and (y>0) and (x <= self.Width) and (y <= self.Height):
             cmd = "GP %d %d\n" % (x,y)
-            while len(self.ClientSocket.recv(5))>0:
-                pass
+            self.ClientSocket.recv
             self.ClientSocket.send(cmd.encode())
-            answer = self.ClientSocket.recv(180).decode().split()
+            answer = self.ClientSocket.recv(6).decode().split()
             print(answer)
             if (len(answer) >= 6):
                 #color = bytes.fromhex(answer[3][1:])
