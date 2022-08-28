@@ -133,14 +133,36 @@ def Desktop():
     #frame = frame.crop((350, 300, 1550, 700))
     im = cv2.resize(np.array(frame),maxsize,interpolation=cv2.INTER_LINEAR)#INTER_AREA)
     #im = cv2.cvtColor(np.array(frame), cv2.COLOR_BGR2RGB)
+    NumpyArrayOut(im)
+    time.sleep(0.06)
+
+def NumpyArrayOut(im):
     for i in range (0, im.shape[1]):
         for j in range(0,im.shape[0]):
             Putpixel(i,j,im[j,i])
     SendUDP(Mode, OutputArray)
-    time.sleep(0.06)
+    
+
+def AnimatePicture(filename):
+    maxsize = (Display_Width, Display_Height)  
+    frame = cv2.imread(filename)
+    CropWidth = int(frame.shape[0] * Display_Width / Display_Height)
+    print(frame.shape[0],frame.shape[1], CropWidth)
+    steps = frame.shape[1] - CropWidth
+    for x in range(steps):
+        y=0
+        h=frame.shape[0]
+        w=CropWidth
+        crop_image = frame[y:h, x:w+x]
+        crop_image = cv2.resize(crop_image,maxsize,interpolation=cv2.INTER_AREA)
+        im = cv2.cvtColor(crop_image, cv2.COLOR_BGR2RGB)
+        NumpyArrayOut(im)
+   
     
 def ShowPicture(filename):
     frame = Image.open(filename)
+    if frame.size[0]/frame.size[1] > 2:
+        return AnimatePicture(filename)
     enhancer = ImageEnhance.Brightness(frame)
     im_pil = enhancer.enhance(gain)
     im = im_pil.copy()
