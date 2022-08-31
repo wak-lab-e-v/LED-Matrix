@@ -646,6 +646,8 @@ void loop(){
       if (!Connected && (myTime > Web_Timer + 400))
       {
         Serial.println("connected to server");
+        Serial.print(WiFi.localIP());
+        Serial.print(' -> ');
         Serial.println(server);
         if (client.connect(server, SOCKET_PORT)) {
           client.println("GM");
