@@ -47,7 +47,8 @@ spi_device_handle_t spi_handle;
 std::deque<spi_transaction_t> transactions;
 int queue_size {1};
 
-uint32_t myTime, starttime, UDP_Timer, Web_Timer;
+uint32_t Default_offset;
+uint32_t myTime, starttime, UDP_Timer, Web_Timer, Web_ReConnect_Timer;
 boolean downloadactive;
 uint8_t  UDP_Timeout = 20;
 boolean connected = false;
@@ -234,8 +235,9 @@ void SetupWiFi(void)
     WiFi.begin(WLAN[knownNetwork].ssid, WLAN[knownNetwork].password);
     Serial.println("");
     myTime = millis();
-    UDP_Timer = myTime;
-    Web_Timer = myTime;
+    UDP_Timer = myTime + 20000;
+    Web_Timer = myTime + 20000;
+    Web_ReConnect_Timer = myTime + 20000;
     // Wait for connection
     while ((WiFi.status() != WL_CONNECTED) && (myTime < (UDP_Timer + 1000*UDP_Timeout))) {
       delay(500);
@@ -468,6 +470,16 @@ void doBinary(uint8_t *buffer, const size_t size, uint32_t width, uint32_t heigh
     }
   } 
 }
+void doDefaultFrames() // Start Bilder
+{
+  
+  for (int i = 0; i< (LED_TRIBLES); i++)
+    defaultbild[i+4] = myGraphic[i+Default_offset];
+  doNeo(defaultbild, 4+LED_TRIBLES);
+  Default_offset += LED_TRIBLES;
+  if (Default_offset >= sizeof(myGraphic))
+    Default_offset = 0;
+}
 
 void doBitmap(uint8_t *buffer, const size_t size, uint32_t width, uint32_t height, uint16_t offset = 0x36)
 {
@@ -606,9 +618,8 @@ void setup() {
   defaultbild[1] = 1;
   defaultbild[2] = 0;
   defaultbild[3] = 0;
-  for (int i = 0; i< (LED_TRIBLES); i++)
-    defaultbild[i+4] = myGraphic32[i];
-  doNeo(defaultbild, 4+LED_TRIBLES);
+  Default_offset = 0;
+  
 }
 
 void loop(){
@@ -621,8 +632,8 @@ void loop(){
     UDP_Timer   = myTime;
     UDP_Timeout = udp_buffer[1];
   }
-  if ((myTime > (UDP_Timer + 1000*UDP_Timeout)) && ((myTime > Web_Timer + 20000)) && (myTime >= (starttime + 59))) // 
-    doDemo();
+  
+
     
   if (myTime > (UDP_Timer + 1000*UDP_Timeout))
   {
@@ -643,11 +654,11 @@ void loop(){
 //    }
     if (true)
     {
-      if (!Connected && (myTime > Web_Timer + 400))
+      if (!Connected && (myTime > Web_ReConnect_Timer + 12000))
       {
         Serial.println("connected to server");
         Serial.print(WiFi.localIP());
-        Serial.print(' -> ');
+        Serial.print(" -> ");
         Serial.println(server);
         if (client.connect(server, SOCKET_PORT)) {
           client.println("GM");
@@ -655,8 +666,9 @@ void loop(){
           Connected = true;
           downloadactive = true;
           bitmappointer = 0;
+          Web_Timer   = myTime;
         }
-        Web_Timer   = myTime;
+        Web_ReConnect_Timer = myTime;
       }
       while (Connected && downloadactive && client.available() && (millis() < Web_Timer + 10000)) {
         //char c = client.read();
@@ -673,7 +685,7 @@ void loop(){
         downloadactive = false;
       }
 
-      if ((myTime > Web_Timer + 10000))
+      if (Connected and (myTime > Web_Timer + 10000))
       {
         downloadactive = false;
         Serial.println("disconnecting from server.");
@@ -717,6 +729,8 @@ void loop(){
   
   if (myTime >= (starttime + UDP_DELAY)) // 17 fps
   { 
+    if ((myTime > (UDP_Timer + 1000*UDP_Timeout)) && (myTime > Web_Timer + 20000)) //  && (myTime >= (starttime + 59))) // 
+      doDefaultFrames();
     starttime = myTime;
     //Serial.println("DMA");
     DMATransfer(led_stream_buf, BUFFER_SIZE);

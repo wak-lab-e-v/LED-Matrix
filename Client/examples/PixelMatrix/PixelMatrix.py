@@ -31,7 +31,7 @@ DefaultHeight = 33
 
                 
 class UdpPixelMatrix():
-    def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True, Dim = (DefaultWidth, DefaultWidth)):
+    def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True, Dim = (DefaultWidth, DefaultHeight)):
         self.serverAddressPort = (UDPserver, Port)
         self.lastSend = int(round(time.time() * 1000))
         self.Height = Dim[1]
@@ -189,7 +189,7 @@ class UdpPixelMatrix():
  
 
 class PixelMatrix():
-    def __init__(self, Pixelserver='127.0.0.1', Port = 1337, Dim = (DefaultWidth, DefaultWidth)):
+    def __init__(self, Pixelserver='127.0.0.1', Port = 1337, Dim = (DefaultWidth, DefaultHeight)):
         self.serverAddressPort = (Pixelserver, Port)
         print('Connected to', Pixelserver, Port) 
         self.lastSend = int(round(time.time() * 1000))
@@ -197,7 +197,7 @@ class PixelMatrix():
         self.Width  = Dim[0]
 
         self.ClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-        self.ClientSocket.settimeout(0.1)
+        self.ClientSocket.settimeout(0.5)
         self.ClientSocket.connect(self.serverAddressPort) # TCP
 
     def drawpixel(x,y, aColor):
@@ -212,6 +212,7 @@ class PixelMatrix():
             #print(cmd)
             #cmd = "PX 20 20 #FFFFFF\n"
             #cmd = 'HELP\n'
+            
             self.ClientSocket.send(cmd.encode())
             self.ClientSocket.recv
             #print(self.ClientSocket.recv(180).decode())
