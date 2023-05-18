@@ -141,7 +141,7 @@ class UdpPixelMatrix():
             color = self.Color16(self.GammaTable[aColor[0]], self.GammaTable[aColor[1]], self.GammaTable[aColor[2]])  ## RGB
         offset = self.PixelDecoder(x, y)
 
-        self.OutputArray[offset] = color;
+        self.OutputArray[offset] = color
 
     def Black(self):
         for i in range (1, self.Width+1 ):

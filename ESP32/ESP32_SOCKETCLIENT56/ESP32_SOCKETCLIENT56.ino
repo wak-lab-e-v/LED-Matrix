@@ -1,4 +1,6 @@
 // ESP32 Dev Module
+// CPU 240MHz
+// Partition Scheme:  Huge APP 4MB
 #include <Arduino.h>
 #include "WiFi.h"
 #include <WiFiUdp.h>
@@ -601,7 +603,7 @@ uint16_t SearchBitmapHeader(byte *Array , int Size, uint32_t *width,  uint32_t *
 void setup() {
   // put your setup code here, to run once:
   pinMode(ONBOARD_LED, OUTPUT);
-  
+  client.setTimeout(100); // Connection
   Serial.begin(115200);
   SetupDMA();
 
@@ -729,6 +731,15 @@ void loop(){
   
   if (myTime >= (starttime + UDP_DELAY)) // 17 fps
   { 
+//    Serial.print(myTime);
+//    Serial.print(" ");
+//    Serial.print(UDP_Timer);
+//    Serial.print(" ");
+//    Serial.print(Web_ReConnect_Timer);
+//    Serial.print(" ");
+//    Serial.println(Web_Timer);
+       
+    
     if ((myTime > (UDP_Timer + 1000*UDP_Timeout)) && (myTime > Web_Timer + 20000)) //  && (myTime >= (starttime + 59))) // 
       doDefaultFrames();
     starttime = myTime;

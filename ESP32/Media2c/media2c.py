@@ -10,7 +10,8 @@ Display_Width  = 56
 Display_Height = 32
 
 gain = 0.75
-MAXFRAME = 100
+STARTFRAME = 4
+MAXFRAME = 168
 
 w,h = Display_Width, Display_Height
 t = (w*h,3)
@@ -67,7 +68,12 @@ def NumpyArrayOut(im):
     for i in range (0, im.shape[1]):
         for j in range(0,im.shape[0]):
             Putpixel(i,j,im[j,i])
+    
     return OutputArray
+
+def ExportIMG(Image, index):
+    OUT = cv2.cvtColor(Image, cv2.COLOR_BGR2RGB)
+    cv2.imwrite('./split/%d.png'%index,OUT)
 
 def Image2C(filename):
     frame = PilImage.open(filename)
@@ -84,39 +90,19 @@ def Image2C(filename):
     NpArray2h(OutputArray)
     print(OutputArray)
 
+
+    
+
 def Gif2C(filename):
     size = 0
     img = PilImage.open(filename)
     for i,frame in enumerate(ImageSequence.Iterator(img)):
-        frm = frame.convert('RGBA') 
-        enhancer = ImageEnhance.Brightness(frm)
-        im_pil = enhancer.enhance(gain)
-        im = im_pil.copy()
-        im.thumbnail((Display_Width, Display_Height))
-        im = im.convert('RGBA')
-        arr = np.array(im)
-        if size == 0:
-            array1 = np.copy(NumpyArrayOut(arr))
-        else:
-            array1 = np.vstack([array1,NumpyArrayOut(arr)])
-        size += 1
-        if size >= MAXFRAME:
-                break
-    NpArray2h(array1)
-   
-def Mp42C(filename):
-    size = 0
-    video = cv2.VideoCapture(filename)
-    while True:
-        ret,frame = video.read() 
-        if ret: 
-            maxsize = (Display_Width, Display_Height) 
-            im = cv2.resize(frame,maxsize,interpolation=cv2.INTER_AREA)
-            im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-            frame = PilImage.fromarray(im)
-            enhancer = ImageEnhance.Brightness(frame)
+        if (i+1)>= STARTFRAME:
+            frm = frame.convert('RGBA') 
+            enhancer = ImageEnhance.Brightness(frm)
             im_pil = enhancer.enhance(gain)
             im = im_pil.copy()
+            im.thumbnail((Display_Width, Display_Height))
             im = im.convert('RGBA')
             arr = np.array(im)
             if size == 0:
@@ -125,7 +111,34 @@ def Mp42C(filename):
                 array1 = np.vstack([array1,NumpyArrayOut(arr)])
             size += 1
             if size >= MAXFRAME:
-                break
+                    break
+    NpArray2h(array1)
+   
+def Mp42C(filename):
+    size = 0
+    i = 0
+    video = cv2.VideoCapture(filename)
+    while True:
+        ret,frame = video.read()
+        if ret:
+            i+=1
+            if i>= STARTFRAME:
+                maxsize = (Display_Width, Display_Height) 
+                im = cv2.resize(frame,maxsize,interpolation=cv2.INTER_AREA)
+                im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+                frame = PilImage.fromarray(im)
+                enhancer = ImageEnhance.Brightness(frame)
+                im_pil = enhancer.enhance(gain)
+                im = im_pil.copy()
+                im = im.convert('RGBA')
+                arr = np.array(im)
+                if size == 0:
+                    array1 = np.copy(NumpyArrayOut(arr))
+                else:
+                    array1 = np.vstack([array1,NumpyArrayOut(arr)])
+                size += 1
+                if size >= MAXFRAME:
+                    break
                 
         else:
             break
