@@ -17,9 +17,13 @@ char server[20];
 #define UDP_PORT 21324
 #define SOCKET_PORT 1337
 
+// Input vom Server ist Default 60x33
+#define GOPIXEL_WIDTH  60  
+#define GOPIXEL_HEIGHT 33
+
 WiFiUDP udp;
 #define UDP_BUFFERSIZE 2048 
-#define BITMAP_SIZE    0x3000
+#define BITMAP_SIZE    0x3000 
 uint8_t udp_buffer[UDP_BUFFERSIZE];
 
 #define WS2812_PWM_ZERO 0xC0 //0b11000000
@@ -29,9 +33,10 @@ uint8_t udp_buffer[UDP_BUFFERSIZE];
 #define LED_PIN 13   // MOSI
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER RGB
-#define NUM_LEDS (MATRIX_WIDTH*MATRIX_HEIGHT) // 1980 // 512
+static const uint16_t  NUM_LEDS = (MATRIX_WIDTH*MATRIX_HEIGHT); // 1980 // 512
+static const uint16_t  LED_TRIBLES = NUM_LEDS*3;
+static const uint16_t  GOPIXEL_TRIBLES = GOPIXEL_WIDTH * GOPIXEL_HEIGHT *3;
 //static const uint32_t UDP_DELAY = 20; //((59000 / 1980) * NUM_LEDS) / 1000;
-
 static const uint32_t BUFFER_SIZE = NUM_LEDS * 24;
 uint8_t* led_stream_buf;
 uint8_t* defaultbild;
@@ -42,7 +47,8 @@ spi_device_handle_t spi_handle;
 std::deque<spi_transaction_t> transactions;
 int queue_size {1};
 
-uint32_t myTime, starttime, UDP_Timer, Web_Timer;
+uint32_t Default_offset;
+uint32_t myTime, starttime, UDP_Timer, Web_Timer, Web_ReConnect_Timer;
 boolean downloadactive;
 uint8_t  UDP_Timeout = 20;
 boolean connected = false;
@@ -229,8 +235,9 @@ void SetupWiFi(void)
     WiFi.begin(WLAN[knownNetwork].ssid, WLAN[knownNetwork].password);
     Serial.println("");
     myTime = millis();
-    UDP_Timer = myTime;
-    Web_Timer = myTime;
+    UDP_Timer = myTime + 20000;
+    Web_Timer = myTime + 20000;
+    Web_ReConnect_Timer = myTime + 20000;
     // Wait for connection
     while ((WiFi.status() != WL_CONNECTED) && (myTime < (UDP_Timer + 1000*UDP_Timeout))) {
       delay(500);
@@ -375,6 +382,54 @@ void doASCIImap(uint8_t *buffer, const size_t size, uint32_t width, uint32_t hei
 }
 
 
+void doChaosBinary(uint8_t *buffer, const size_t size, uint32_t width, uint32_t height)
+{
+  uint16_t matrixsize = GOPIXEL_WIDTH*GOPIXEL_HEIGHT; 
+  uint16_t i,j,idx;
+  uint8_t brigness_r,brigness_g,brigness_b;
+  uint8_t  segment;
+  uint8_t  x,y,x2;
+  x = 0;
+  y = 0; 
+  for (i=0;i<matrixsize;i++)
+  {
+    
+    if ((x < width) and (y < height))
+    {
+      j = 3*i;
+      brigness_r = gamma8(buffer[j]);
+      brigness_g = gamma8(buffer[j+1]);
+      brigness_b = gamma8(buffer[j+2]);  
+      segment = int(x / 8);
+      
+      if (y % 2 == 0)
+        x2 = x;
+      else
+         x2 = 7-x;
+     
+      idx = 24 * (255+(segment*256)-(x2%8)-(y*8));
+      if (brigness_g > 60) brigness_g = 60;
+      if (brigness_r > 60) brigness_r = 60;
+      if (brigness_b > 60) brigness_b = 60;
+      
+      if (idx <= (BUFFER_SIZE-24))
+      {
+        SPI_Output_octet(brigness_g,led_stream_buf+(idx));
+        SPI_Output_octet(brigness_r,led_stream_buf+(idx+8));
+        SPI_Output_octet(brigness_b,led_stream_buf+(idx+16));
+      }
+    } 
+    
+    x += 1;
+    if (x >= GOPIXEL_WIDTH) 
+    {
+      x = 0;
+      y += 1;
+    }
+       
+  }
+}
+  
 void doBinary(uint8_t *buffer, const size_t size, uint32_t width, uint32_t height)
 {
   uint16_t matrixsize = width*height;
@@ -414,6 +469,16 @@ void doBinary(uint8_t *buffer, const size_t size, uint32_t width, uint32_t heigh
       SPI_Output_octet(brigness_b,led_stream_buf+(index+16));
     }
   } 
+}
+void doDefaultFrames() // Start Bilder
+{
+  
+  for (int i = 0; i< (LED_TRIBLES); i++)
+    defaultbild[i+4] = myGraphic[i+Default_offset];
+  doNeo(defaultbild, 4+LED_TRIBLES);
+  Default_offset += LED_TRIBLES;
+  if (Default_offset >= sizeof(myGraphic))
+    Default_offset = 0;
 }
 
 void doBitmap(uint8_t *buffer, const size_t size, uint32_t width, uint32_t height, uint16_t offset = 0x36)
@@ -536,7 +601,7 @@ uint16_t SearchBitmapHeader(byte *Array , int Size, uint32_t *width,  uint32_t *
 void setup() {
   // put your setup code here, to run once:
   pinMode(ONBOARD_LED, OUTPUT);
-  
+  client.setTimeout(100); // Connection 
   Serial.begin(115200);
   SetupDMA();
 
@@ -548,14 +613,13 @@ void setup() {
   bitmapbuffer =  (uint8_t*)heap_caps_malloc(BITMAP_SIZE, MALLOC_CAP_8BIT);
   bitmappointer = 0;
 
-  defaultbild =  (uint8_t*)heap_caps_malloc(4+NUM_LEDS*3, MALLOC_CAP_8BIT);
+  defaultbild =  (uint8_t*)heap_caps_malloc(4+LED_TRIBLES, MALLOC_CAP_8BIT);
   defaultbild[0] = 4;
   defaultbild[1] = 1;
   defaultbild[2] = 0;
   defaultbild[3] = 0;
-  for (int i = 0; i< (NUM_LEDS*3); i++)
-    defaultbild[i+4] = myGraphic[i];
-  doNeo(defaultbild, 4+NUM_LEDS*3);
+  Default_offset = 0;
+  
 }
 
 void loop(){
@@ -568,8 +632,8 @@ void loop(){
     UDP_Timer   = myTime;
     UDP_Timeout = udp_buffer[1];
   }
-  if ((myTime > (UDP_Timer + 1000*UDP_Timeout)) && ((myTime > Web_Timer + 20000)) && (myTime >= (starttime + 59))) // 
-    doDemo();
+  
+
     
   if (myTime > (UDP_Timer + 1000*UDP_Timeout))
   {
@@ -590,9 +654,11 @@ void loop(){
 //    }
     if (true)
     {
-      if (!Connected && (myTime > Web_Timer + 400))
+      if (!Connected && (myTime > Web_ReConnect_Timer + 12000))
       {
         Serial.println("connected to server");
+        Serial.print(WiFi.localIP());
+        Serial.print(" -> ");
         Serial.println(server);
         if (client.connect(server, SOCKET_PORT)) {
           client.println("GM");
@@ -600,8 +666,9 @@ void loop(){
           Connected = true;
           downloadactive = true;
           bitmappointer = 0;
+          Web_Timer   = myTime;
         }
-        Web_Timer   = myTime;
+        Web_ReConnect_Timer = myTime;
       }
       while (Connected && downloadactive && client.available() && (millis() < Web_Timer + 10000)) {
         //char c = client.read();
@@ -610,15 +677,15 @@ void loop(){
           bitmapbuffer[bitmappointer++] = client.read();
         } 
       }
-      //if (bitmappointer > 6*MATRIX_WIDTH*MATRIX_HEIGHT)
-      if (bitmappointer > 3*MATRIX_WIDTH*MATRIX_HEIGHT)
+
+      if (bitmappointer > GOPIXEL_TRIBLES)   
       {
         while (client.available()) 
           client.read();
         downloadactive = false;
       }
 
-      if ((myTime > Web_Timer + 10000))
+      if (Connected and (myTime > Web_Timer + 10000))
       {
         downloadactive = false;
         Serial.println("disconnecting from server.");
@@ -635,8 +702,13 @@ void loop(){
         
         //if (bitmappointer == MATRIX_WIDTH*MATRIX_HEIGHT*6+2)
         //  doASCIImap(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
-        if ((bitmappointer >= NUM_LEDS*3) && (bitmappointer < NUM_LEDS*3+6))
-          doBinary(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
+        if ((bitmappointer >= GOPIXEL_TRIBLES) && (bitmappointer < GOPIXEL_TRIBLES+6))
+        {
+          if (MATRIX_WIDTH == 56)
+            doChaosBinary(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
+          else
+            doBinary(bitmapbuffer, BITMAP_SIZE, MATRIX_WIDTH, MATRIX_HEIGHT);
+        }
         Connected = client.connected();
         if (Connected)
         {
@@ -657,6 +729,17 @@ void loop(){
   
   if (myTime >= (starttime + UDP_DELAY)) // 17 fps
   { 
+//    Serial.print(myTime);
+//    Serial.print(" ");
+//    Serial.print(UDP_Timer);
+//    Serial.print(" ");
+//    Serial.print(Web_ReConnect_Timer);
+//    Serial.print(" ");
+//    Serial.println(Web_Timer);
+       
+    
+    if ((myTime > (UDP_Timer + 1000*UDP_Timeout)) && (myTime > Web_Timer + 20000)) //  && (myTime >= (starttime + 59))) // 
+      doDefaultFrames();
     starttime = myTime;
     //Serial.println("DMA");
     DMATransfer(led_stream_buf, BUFFER_SIZE);

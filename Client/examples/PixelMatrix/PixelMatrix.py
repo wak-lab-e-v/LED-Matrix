@@ -31,7 +31,7 @@ DefaultHeight = 33
 
                 
 class UdpPixelMatrix():
-    def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True, Dim = (DefaultWidth, DefaultHeight)):
+    def __init__(self, UDPserver='127.0.0.1', Port = 21324, Mode = 5, Autosend = True, Dim = (DefaultWidth, DefaultHeight), WLED = False):
         self.serverAddressPort = (UDPserver, Port)
         self.lastSend = int(round(time.time() * 1000))
         self.Height = Dim[1]
@@ -40,9 +40,14 @@ class UdpPixelMatrix():
             self.PixelDecoder = self.PixelDecoderChaos
         else:
             self.PixelDecoder = self.PixelDecoderSnake
+        if WLED:
+            self.PixelDecoder = self.PixelDecoderDefault
             
         self.OutputArray = np.zeros((self.Height*self.Width,3),dtype=np.uint8)
-        self.Mode =  Mode;
+        if not WLED:
+            self.Mode =  Mode;
+        else:
+            self.Mode =  4; # WLED only support mode 4
         self.MaxLight = 0x3f
         self.GammaTable = np.array([((i / 255.0) ** 2.6) * self.MaxLight+0.5 # gamma 2.6
             for i in np.arange(0, 256)]).astype("uint8")
@@ -52,6 +57,12 @@ class UdpPixelMatrix():
             send_thread = Thread(target=self.cyclic_send)
             send_thread.start()
             
+    @lru_cache(maxsize=None)
+    def PixelDecoderDefault(self, x, y):
+        Spalte = x-1
+        Zeile  = y-1
+        return Zeile * self.Width + Spalte
+
     @lru_cache(maxsize=None)
     def PixelDecoderSnake(self, x, y):
         if (y == 0):
