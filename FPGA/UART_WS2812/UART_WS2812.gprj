@@ -1,0 +1,17 @@
+<?xml version="1" encoding="UTF-8"?>
+<!DOCTYPE gowin-fpga-project>
+<Project>
+    <Template>FPGA</Template>
+    <Version>5</Version>
+    <Device name="GW1NZ-1" pn="GW1NZ-LV1QN48C6/I5">gw1nz1-015</Device>
+    <FileList>
+        <File path="src/gowin_dpb/gowin_dpb.v" type="file.verilog" enable="1"/>
+        <File path="src/gowin_rpll/gowin_rpll.v" type="file.verilog" enable="1"/>
+        <File path="src/Toplevel.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/UART_BRAM.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/UART_RX.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/WS2812_BRAM.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/WS2812_CTRL.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/UART_WS2812.cst" type="file.cst" enable="1"/>
+    </FileList>
+</Project>

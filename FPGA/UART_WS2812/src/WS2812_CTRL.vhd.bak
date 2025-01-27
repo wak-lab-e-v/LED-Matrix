@@ -1,0 +1,51 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity WS2812_Controller is
+    port (
+        i_Clk       : in  std_logic;                     -- Eingangs-Takt
+        i_Data      : in  std_logic_vector(7 downto 0); -- RGB-Daten von BRAM
+        o_WS2812    : out std_logic;                     -- Ausgang für WS2812-Daten
+        i_Start     : in  std_logic;                     -- Startsignal für die Übertragung
+        o_Done      : out std_logic                      -- Signal, das anzeigt, dass die Übertragung abgeschlossen ist
+    );
+end WS2812_Controller;
+
+architecture Behavioral of WS2812_Controller is
+    signal bit_counter : integer := 0; -- Zähler für die Anzahl der gesendeten Bits
+    signal state       : integer := 0; -- Zustand der FSM
+    signal ws_data     : std_logic_vector(7 downto 0); -- Daten, die an die WS2812 gesendet werden
+begin
+
+    process(i_Clk)
+    begin
+        if rising_edge(i_Clk) then
+            case state is
+                when 0 => -- Idle State
+                    if i_Start = '1' then
+                        ws_data <= i_Data; -- Lade die RGB-Daten
+                        bit_counter <= 0; -- Setze den Bit-Zähler zurück
+                        state <= 1; -- Wechsel in den Sendestatus
+                        o_Done <= '0'; -- Setze Done auf 0
+                    end if;
+
+                when 1 => -- Send Bit State
+                    if bit_counter < 8 then
+                        o_WS2812 <= ws_data(7 - bit_counter); -- Sende das aktuelle Bit
+                        bit_counter <= bit_counter + 1; -- Erhöhe den Bit-Zähler
+                    else
+                        state <= 2; -- Wechsel in den Done-Zustand
+                    end if;
+
+                when 2 => -- Done State
+                    o_Done <= '1'; -- Setze Done auf 1
+                    state <= 0; -- Zurück in den Idle-Zustand
+
+                when others =>
+                    state <= 0; -- Fallback in den Idle-Zustand
+            end case;
+        end if;
+    end process;
+
+end Behavioral;
