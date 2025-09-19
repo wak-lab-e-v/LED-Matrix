@@ -23,6 +23,7 @@ serverAddressPort   = ("10.10.22.57", 21324)
 serverAddressPort   = ("192.168.1.226", 21324) # WAKLAB OPenWRT
 
 serverAddressPort   = ("127.0.0.1", 21324)
+serverAddressPort   = ("192.168.178.60", 21324)
 
 #serverAddressPort   = ("192.168.1.226", 21324)
 
@@ -76,10 +77,10 @@ def SendUDP(aMode, array):
     while True:
         if Mode == 4:
             bytesToSend         = b'\x04\x02'
-            UDP_Leds = 480
+            UDP_Leds = 300 #480
         else:
             bytesToSend         = b'\x05\x02'
-            UDP_Leds = 700
+            UDP_Leds = 440
             
         bytesToSend  += offset.to_bytes(2,'big')
         segment      = array[offset:offset+UDP_Leds]
@@ -132,27 +133,17 @@ def Desktop():
     #frame = frame[30:250, 100:230]
     #frame = frame.crop((350, 300, 1550, 700))
     im = cv2.resize(np.array(frame),maxsize,interpolation=cv2.INTER_LANCZOS4  ) #INTER_AREA)
+    img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+     
+    im_pil = Image.fromarray(img)
 
+    enhancer = ImageEnhance.Brightness(im_pil)
+    im_pil = enhancer.enhance(gain)
+    im = im_pil.copy()
+    im = im.convert('RGBA')
+    arr = np.array(im)
 
-##    frm = np.array(frame)
-##    x_step = frame.size[0] / Display_Width
-##    y_step = frame.size[1] / Display_Height
-##    
-##    im = np.zeros(shape=(Display_Height, Display_Width,3))  
-##    for i in range (0, frame.size[0]):
-##        for j in range(0, frame.size[1]):
-##            x = int(i/x_step)
-##            y = int(j/y_step)
-##            if np.sum(im[y,x]) < np.sum(frm[j,i]):
-##                im[y,x] = frm[j,i]
-            
-            
-            
-    #sp = np.array_split(im, 10, axis=0)
-    #print(sp, len(sp), len(sp[0]), sp[0][0].shape)
-    
-    #im = cv2.cvtColor(np.array(frame), cv2.COLOR_BGR2RGB)
-    NumpyArrayOut(im)
+    NumpyArrayOut(arr)
     time.sleep(0.06)
 
 def NumpyArrayOut(im):
