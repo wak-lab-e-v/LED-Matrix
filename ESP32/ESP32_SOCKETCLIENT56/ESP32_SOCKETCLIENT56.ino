@@ -7,7 +7,7 @@
 #include <SPI.h>
 #include <driver/spi_master.h>
 #include <deque>
-#include "default.h"
+#include "default_maus.h"
 
 #include "ssid.h"
 int status = WL_IDLE_STATUS;
@@ -22,6 +22,7 @@ char server[20];
 // Input vom Server ist Default 60x33
 #define GOPIXEL_WIDTH  60  
 #define GOPIXEL_HEIGHT 33
+#define ENABLE_GO_SERVER false
 
 WiFiUDP udp;
 #define UDP_BUFFERSIZE 2048 
@@ -151,7 +152,22 @@ void SetupWebClient(void)
   
 void SetupDMA(void)
 {
-  spi_device_interface_config_t if_cfg {0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // spi_master.h
+    spi_device_interface_config_t if_cfg = {
+      .command_bits = 0,
+      .address_bits = 0,
+      .dummy_bits = 0,
+      .mode = 0,
+      .duty_cycle_pos = 0,
+      .cs_ena_pretrans = 0,
+      .cs_ena_posttrans = 0,
+      .clock_speed_hz = 0,
+      .input_delay_ns = 0,
+      .spics_io_num = -1,  // -1, wenn nicht verwendet
+      .flags = 0,
+      .queue_size = 0,
+      .pre_cb = NULL,
+      .post_cb = NULL
+  };
   spi_host_device_t host {HSPI_HOST}; // spi_types.h
   spi_bus_config_t bus_cfg {-1,-1,-1,-1,-1,0,0,0}; // spi_common.h
                  
@@ -250,6 +266,7 @@ void SetupWiFi(void)
     Serial.print("Connected to ");
     Serial.println(WLAN[knownNetwork].ssid);
     Serial.println(WiFi.localIP());
+    udp.begin(WiFi.localIP(),UDP_PORT);
   }
   else 
   {
@@ -654,7 +671,7 @@ void loop(){
 //        bitmapbuffer[bitmappointer++] = client.read();
 //      } 
 //    }
-    if (true)
+    if (ENABLE_GO_SERVER)
     {
       if (!Connected && (myTime > Web_ReConnect_Timer + 12000))
       {
@@ -760,7 +777,7 @@ void loop(){
 //wifi event handler
 void WiFiEvent(WiFiEvent_t event){
     switch(event) {
-      case SYSTEM_EVENT_STA_GOT_IP:
+      case IP_EVENT_STA_GOT_IP:
           //When connected set 
           Serial.print("WiFi connected! IP address: ");
           Serial.println(WiFi.localIP());  
@@ -768,9 +785,12 @@ void WiFiEvent(WiFiEvent_t event){
           udp.begin(WiFi.localIP(),UDP_PORT);
           connected = true;
           break;
-      case SYSTEM_EVENT_STA_DISCONNECTED:
+      case WIFI_EVENT_STA_DISCONNECTED:
           Serial.println("WiFi lost connection");
           connected = false;
           break;
+      Serial.print("WiFi event:");
+      Serial.println(event);
+      
     }
 }

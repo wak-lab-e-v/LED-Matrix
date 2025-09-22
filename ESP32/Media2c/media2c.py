@@ -10,8 +10,9 @@ Display_Width  = 56
 Display_Height = 32
 
 gain = 0.75
-STARTFRAME = 4
+STARTFRAME = 0
 MAXFRAME = 168
+ColorMode = "24Bit"
 
 w,h = Display_Width, Display_Height
 t = (w*h,3)
@@ -113,6 +114,55 @@ def Gif2C(filename):
             if size >= MAXFRAME:
                     break
     NpArray2h(array1)
+    
+    
+#def process_images(image_list):
+#    array1 = None
+#    for im in image_list:
+#        im = im.convert('RGB')  # Konvertiere in RGB
+#        arr = np.array(im)
+        
+#        if array1 is None:
+#            array1 = np.copy(arr)  # Initialisiere array1
+#        else:
+#            array1 = np.concatenate((array1, arr), axis=0)  # Füge das neue Array hinzu
+            
+#    return array1
+
+def convert_to_2bit_bw(arr):
+    
+    # Überprüfen, ob das Bild RGB ist
+    print(arr.shape[1])
+            
+    if arr.ndim == 2 and arr.shape[1] == 3:  # RGB-Bild
+        # Graustufen umwandeln
+        gray_arr = 0.2989 * arr[:, :, 0] + 0.5870 * arr[:, :, 1] + 0.1140 * arr[:, :, 2]
+        gray_arr = gray_arr.astype(np.uint8)  # In uint8 umwandeln
+    else:
+        # Wenn das Bild bereits Graustufen ist
+        gray_arr = arr
+        
+        
+    # Umwandlung in 2-Bit-Werte
+    two_bit_arr = (gray_arr // 8).astype(np.uint8)  # Werte in 0-31 umwandeln
+    two_bit_arr = np.clip(two_bit_arr, 0, 3)  # Werte auf 0-3 begrenzen
+    
+
+
+    # Byte aus 4 Pixeln erstellen
+    height, width = two_bit_arr.shape
+    new_width = (width+3) // 4  # Neue Breite für die Bytes
+    byte_array = np.zeros((height, new_width), dtype=np.uint8)
+
+    for y in range(height):
+        for x in range(width):
+            byte_index = x // 4
+            bit_position = (3 - (x % 4)) * 2  # Position im Byte
+            byte_array[y, byte_index] |= (two_bit_arr[y, x] << bit_position)
+
+    return byte_array
+
+
    
 def Mp42C(filename):
     size = 0
@@ -130,12 +180,20 @@ def Mp42C(filename):
                 enhancer = ImageEnhance.Brightness(frame)
                 im_pil = enhancer.enhance(gain)
                 im = im_pil.copy()
+
                 im = im.convert('RGBA')
                 arr = np.array(im)
-                if size == 0:
-                    array1 = np.copy(NumpyArrayOut(arr))
+                if (ColorMode == "2Bit"):
+                    if size == 0:
+                        array1 = np.copy(convert_to_2bit_bw(NumpyArrayOut(arr)))
+                    else:
+                        array1 = np.vstack([array1,convert_to_2bit_bw(NumpyArrayOut(arr))])   
                 else:
-                    array1 = np.vstack([array1,NumpyArrayOut(arr)])
+                    if size == 0:
+                        array1 = np.copy(NumpyArrayOut(arr))
+                    else:
+                        array1 = np.vstack([array1,NumpyArrayOut(arr)])
+                        
                 size += 1
                 if size >= MAXFRAME:
                     break
@@ -144,8 +202,6 @@ def Mp42C(filename):
             break
     NpArray2h(array1)
 
-
-    
 
 if __name__ == "__main__":
     if Display_Width == 56:

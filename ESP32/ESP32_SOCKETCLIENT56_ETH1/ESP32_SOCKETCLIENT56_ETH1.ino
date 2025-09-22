@@ -36,6 +36,7 @@ char server[20];
 // Input vom Server ist Default 60x33
 #define GOPIXEL_WIDTH  60  
 #define GOPIXEL_HEIGHT 33
+#define ENABLE_GO_SERVER false
 
 WiFiUDP udp;
 #ifdef ETH01
@@ -733,7 +734,7 @@ void loop(){
   #ifndef ETH01  
   if (myTime > (UDP_Timer + 1000*UDP_Timeout))
   {
-    if (true)
+    if (ENABLE_GO_SERVER)
     {
 
       if (!Connected && (myTime > Web_ReConnect_Timer + 12000))
